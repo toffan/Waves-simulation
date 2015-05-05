@@ -1,0 +1,86 @@
+% "pdf"
+
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8x]{inputenc}
+
+\usepackage[margin=2cm]{geometry}
+\usepackage{pifont}
+
+\usepackage[colorlinks=true,
+            linkcolor=black]{hyperref}
+\usepackage{titletoc}
+\usepackage{titlesec}
+
+\usepackage{soul}
+\usepackage{ulem}
+
+\usepackage[lined,ruled]{algorithm2e}
+
+\title{\Huge\textbf{Rapport de Phase 1 du Groupe 1}}
+\author{Megna Anaël \& Lemarchand Benoît \& Shimi Adam}
+\date{Jeudi, 7 Mai 2015}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+\lfoot{} \cfoot{} \rfoot{\thepage} \lhead{} \chead{} \rhead{}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{mathrsfs}
+\usepackage{stmaryrd}
+\usepackage{esint}
+\usepackage{esvect}
+\usepackage{multirow}
+
+\usepackage{listings}
+
+\renewcommand{\phi}{\varphi}
+\renewcommand{\epsilon}{\varepsilon}
+
+\setlength{\parindent}{1em}
+
+\begin{document}
+
+\begin{titlepage}
+  \maketitle
+  \thispagestyle{empty}
+  \tableofcontents
+\end{titlepage}
+
+\section{Reconstruction et Classification de la solution d'un modèle
+atmosphérique simplifié}
+
+\section{»» Donner un titre à cette section ««} % TODO
+
+%%%%%%
+
+% exemple d'un algorithme
+
+\begin{algorithm}[H]  % toujours mettre le H
+  \DontPrintSemicolon % pour pas afficher ;
+  initialization\;    % toujours terminer avec \;
+  \BlankLine          % pour sauter une ligne
+  \While{not at end of this document}{
+    read current\;
+    \eIf{understand}{ % eIf = if, else, end / If = if, end
+      go to next section\;
+      current section becomes this one\;
+    }{
+      go back to the beginning of current section\;
+    }
+  }
+  \caption{How to write algorithms} % apparait dans la liste des algorithmes
+\end{algorithm}
+
+\newpage
+\section*{Annexes}
+
+\listofalgorithms
+
+\end{document}
