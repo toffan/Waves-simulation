@@ -109,7 +109,7 @@ méthode de la \og steepest descent\fg, d'où l'algorithme 1.
 
         \begin{itemize}
             \item Il calcule uniquement les valeurs singulières et les vecteurs singuliers à gauche nécessaire d'après le pourcentage d'information demandé.
-            \item En ce qui concerne la complexité en temps pour A $\in \mathbb{R}^{m*m}$, nous obtenons comme formule asymptotique $O(MaxIter*(n*m^2))$. En effet, toutes les matrices impliquées dans notre algorithme sont de taille n*m, excepté A. Nous en déduisons d'après la remarque sur la complexité que l'ensemble des calculs matriciels de notre algorithme est en $O(n*m^2)$. Ajoutons a cela la partie itérative, bornée par MaxIter, et nous obtenons cette complexité.
+            \item En ce qui concerne la complexité en temps pour A $\in \mathbb{R}^{m*m}$, nous obtenons comme formule asymptotique $O(MaxIter*(n*m^2))$. En effet, toutes les matrices impliquées dans notre algorithme sont de taille n*m, excepté $A$. Nous en déduisons d'après la remarque sur la complexité que l'ensemble des calculs matriciels de notre algorithme est en $O(n*m^2)$. Ajoutons a cela la partie itérative, bornée par MaxIter, et nous obtenons cette complexité.
             \item Quand à la complexité en espace, la version naive de l'algorithme, qui consiste à calculer A avant toute chose, nous donne une complexité en $O(m^2)$, étant donné que c'est la matrice la plus volumineuse.
         \end{itemize}
 \bigskip
@@ -117,11 +117,20 @@ méthode de la \og steepest descent\fg, d'où l'algorithme 1.
 \ \\
     Le premier point de comparaison est celui du temps de calcul. Comme nous l'avons vu, asymptotiquement, les deux algorithmes se comportent similairement en terme de temps. Cependant, notre algorithme ne va pas calculer toutes les valeurs singulières, sauf dans de très rares cas. Il semble donc sensé de supposer que si les deux algorithmes se valent dans le pire des cas, le notre a un léger avantage sur svd lorsque \textit{PercentTrace} est relativement éloigné de 1. \\
 
-    Ensuite vient la question de l'espace. Ici, clairement, notre algorithme a un désavantage lié au calcul explicite et au stockage de A, qui fait augmenter la complexité asymptotique en espace. Si l'on considère en plus que m dans le cas pratique que nous implémentons ici est de l'ordre de $10^5$, ce désavantage est écrasant. Nous verrons dans la sous-section suivante comment se passer du stockage de A. \\
+    Ensuite vient la question de l'espace. Ici, clairement, notre algorithme a un désavantage lié au calcul explicite et au stockage de $A$, qui fait augmenter la complexité asymptotique en espace. Si l'on considère en plus que m dans le cas pratique que nous implémentons ici est de l'ordre de $10^5$, ce désavantage est écrasant. Nous verrons dans la sous-section suivante comment se passer du stockage de $A$. \\
 
     Enfin, en ce qui concerne les avantages moins significatifs de notre algorithme, il y a le fait que dans la majorité des cas, il stocke moins de valeurs singulières que svd. Et dans tous les cas, il stocke moins de vecteurs singuliers, étant donné qu'il ne calcule à aucun moment les vecteurs singuliers à droite. Nous pouvons aussi remarquer que notre algorithme sort directement un sous-espace "singulier", tandis qu'il faut reconstruire celui-çi avec la sortie de svd.
 
     \subsection{Implémentation de l'algorithme}
+
+    Comme expliqué dans la sous-section précédente, l'utilisation naive de l'algorithme dérivé de la puissance itérée pour remplacer svd nécessite le calcul de $A = Z*Z^T$, dont l'ordre de grandeur du nombre de coefficients est de $10^{10}$. Ceci fait que le calcul même de $A$ entraine un overflow dans MATLAB, nous forçant à adapter l'algorithme pour l'utiliser. \\
+
+    Voici les moments où nous avons dû modifier l'algorithme fourni pour éviter de calculer $A$ : \\
+
+        \begin{itemize}
+            \item Le calcul de $Y = A^p*V$. Ici, il suffit de remplacer $A$ par $Z*Z^T$, et d'effectuer les calculs. A aucun moment les matrices intermédiaires n'auront une taille supérieure à $n*m$, ce qui est assez petit pour ne pas causer d'overflow dans MATLAB.
+            \item Le calcul du coefficient de Rayleigh $H = V^T*A*V$. Ici, pour gagner en espace, il suffit de décomposer $H = V^T*Z*Z^T*V$, d'où $H = (Z^T*V)^T*(Z^T*V)$. Nous en déduisons que calculer $Z^T*V$ puis d'une transposition et d'un produit matriciel pour calculer le coefficient de Rayleigh.
+        \end{itemize}
 
 %%%%%%
 
