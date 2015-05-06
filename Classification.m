@@ -1,63 +1,66 @@
 clear all;
 close all;
 
-%Use matlab svd function instead of power iteration method
+% Use matlab svd function instead of power iteration method
 use_svd = true;
-%Number of simulations
-Nens=20;
-%Quality of the subspace approximation
-percentInfo=0.95;
+% Basic try / parameter impact
+basic = true;
+% Number of simulations
+Nens = 20;
+% Quality of the subspace approximation
+percentInfo = 0.95;
 
-%Reading the observations
+% Reading the observations
 load('observation-G1.mat');
 
-% Initiatlization
-Pi=zeros(3,1);
+if (basic)
+  [Pi,~] = Classification_computation(Nens, percentInfo, use_svd, Fobs);
+  figure(1)
+  bar(Pi)
+  Nens = [5:10:95];
+  Nens = Nens(:);
+else
+  % Inatialization of parameters
+  number = 3; % max 5
+  Nens = [5:20:95];
+  Nens = Nens(:);
+  percentInfo = [0.90:0.02:0.99];
+  percentInfo = percentInfo(:);
 
-for GWi = 1:3
-    %Generation of the data set
-    Fi = Model(GWi,Nens);
+  % Initialization of results matrix
+  results = zeros(number, number, 3);
 
-    %Computation of the mean and anomalies
-    mFi= mean(Fi,2);
-    Zi=Fi-repmat(mFi,1,Nens);
-
-    %Computation of the dominant left eigenvectors of Zi accordingly to the
-    %targeted quality of the subspace approximation
-    if (use_svd)
-      %Computation of the singular value decomposition
-      [Ui,Si,~] = svd(Zi,0);
-      %Computation of the column vector of the main diagonal elements of A
-      Di = diag(Si);
-      %Verification if Di (Zi) is not null
-      if (Di(1) == 0)
-        disp('Alert: the matrix is null')
-        return
+  for Nens_i=1:number
+    for percentInfo_i=1:number
+      local_results = zeros(number, 3);
+      for n_try=1:number
+        time = cputime;
+        [Pi,dim] = Classification_computation(Nens(Nens_i), percentInfo(percentInfo_i), use_svd, Fobs);
+        time = cputime - time
+        dim = mean(dim);
+        Pi = min(Pi);
+        local_results(n_try,:) = [Pi dim time];
       end
-      k=2;
-      %Compute the number of dominant eigenvalues
-      while (Di(k)/Di(1) > 1-percentInfo)
-        k = k+1;
-      end
-      k = k-1;
-      %Only keep dominant left eigenvectors
-      Ui = Ui(:,1:k);
-      fprintf('dimension of the subspace: %d\n',k);
-    else
-      % TODO: power iteration method
+      results(Nens_i,percentInfo_i,:) = mean(local_results);
     end
+  end
 
-    %Computation of the anomaly vector of observations
-    Zobsi = Fobs - mFi;
-    %Computation of Pi = ||(I - Ui.Uit).Zobsi||, distance of Zobsi to the
-    %subspace associated to the dominant singular values
-    %Computation of the projection of Zobsi on the subspace
-    Uit = transpose(Ui);
-    Intermediate = Uit*Zobsi;
-    Projected = Ui*Intermediate;
-    %Computation of the distance of Zobsi to the subspace
-    Pi(GWi) = norm(Zobsi - Projected);
+  % Draw results
+  figure(1)
+
+  subplot(1, 3, 1);
+  surf(Nens(1:number), percentInfo(1:number), results(:,:,1)); shading('interp');
+  axis([Nens(1), Nens(number), percentInfo(1), percentInfo(number), min(min(results(:,:,1))), max(max(results(:,:,1)))]);
+  title('Pi')
+
+  subplot(1, 3, 2);
+  surf(Nens(1:number), percentInfo(1:number), results(:,:,2)); shading('interp');
+  axis([Nens(1), Nens(number), percentInfo(1), percentInfo(number), min(min(results(:,:,2))), max(max(results(:,:,2)))]);
+  title('dim')
+
+  subplot(1, 3, 3);
+  surf(Nens(1:number), percentInfo(1:number), results(:,:,3)); shading('interp');
+  axis([Nens(1), Nens(number), percentInfo(1), percentInfo(number), min(min(results(:,:,3))), max(max(results(:,:,3)))]);
+  title('time')
+
 end
-
-figure(1)
-bar(Pi)
