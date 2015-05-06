@@ -73,7 +73,7 @@ atmosphérique simplifié}
         \begin{itemize}
             \item Il calcule toutes les valeurs singulières et tous les vecteurs singuliers.
             \item Il est basé, d'après la documentation de MATLAB\footnote{MATLAB utilise la routine svd de LIPACK, dont l'algorithme est expliqué dans \\    J. Demmel, W. Kahan \textit{Accurate Singular Values of Bidiagonal Matrices}, submitted to SIAM J.Sci.Stat.Comput., v.11, n.5, pp.873-912, 1990}, sur l'application successive de transformation de Householder et de Rotation de Givens, avant d'appliquer une methode itérative de calcul des valeurs et vecteurs singuliers pour une matrice bidiagonale.
-            \item Sa complexité asymptotique en temps est, toujours d'après l'implémentation MATLAB, en $O(n*m^2)$.
+            \item Sa complexité asymptotique en temps est, toujours d'après l'implémentation MATLAB, en $O(MaxIter*(n*m^2))$, où MaxIter est le nombre d'itérations maximal de la seconde partie de l'algorithme.
             \item Celle en espace, basée sur celles des différentes étapes de l'algorithme, est en $O(n*m)$.
         \end{itemize}
 \bigskip
@@ -81,11 +81,15 @@ atmosphérique simplifié}
 
         \begin{itemize}
             \item Il calcule uniquement les valeurs singulières et les vecteurs singuliers à gauche nécessaire d'après le pourcentage d'information demandé.
-            \item En ce qui concerne la complexité en temps pour A $\in \mathbb{R}^{mxm}$, on trouve $O(MaxIter*(m^3))$. Ainsi, cet algorithme est pseudo polynomial (avec une complexité borné par un polynome de la taille de l'entrée et de la taille maximum des nombres pris en compte dans le problème.
-            \item Quand à la complexité en espace, la version naive de l'algorithme, qui consiste à calculer A avant toute chose, nous donne une complexité en $O(m^2))$
+            \item En ce qui concerne la complexité en temps pour A $\in \mathbb{R}^{m*m}$, nous obtenons comme formule asymptotique $O(MaxIter*(n*m^2))$. En effet, toutes les matrices impliquées dans notre algorithme sont de taille n*m, excepté A. Nous en déduisons d'après la remarque sur la complexité que l'ensemble des calculs matriciels de notre algorithme est en $O(n*m^2)$. Ajoutons a cela la partie itérative, bornée par MaxIter, et nous obtenons cette complexité.
+            \item Quand à la complexité en espace, la version naive de l'algorithme, qui consiste à calculer A avant toute chose, nous donne une complexité en $O(m^2)$, étant donné que c'est la matrice la plus volumineuse.
         \end{itemize}
 \bigskip
-    Le premier point de comparaison
+    Le premier point de comparaison est celui du temps de calcul. Comme nous l'avons vu, asymptotiquement, les deux algorithmes se comportent similairement en terme de temps. Cependant, notre algorithme ne va pas calculer toutes les valeurs singulières, sauf dans de très rares cas. Il semble donc sensé de supposer que si les deux algorithmes se valent dans le pire des cas, le notre a un léger avantage sur svd lorsque \textit{PercentTrace} est relativement éloigné de 1. \\
+
+    Ensuite vient la question de l'espace. Ici, clairement, notre algorithme a un désavantage lié au calcul explicite et au stockage de A, qui fait augmenter la complexité asymptotique en espace. Si l'on considère en plus que m dans le cas pratique dont nous essayons de faire quelque chose est de l'ordre de $10^5$, ce désavantage est écrasant. Nous verrons dans la sous-section suivante comment se passer du stockage de A. \\
+
+    
 
 %%%%%%
 
