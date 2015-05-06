@@ -15,7 +15,7 @@
 \usepackage{titlesec}
 
 \usepackage{soul}
-\usepackage{ulem}
+% \usepackage{ulem}
 
 \usepackage[lined,ruled]{algorithm2e}
 
@@ -57,6 +57,23 @@
 
 \section{Reconstruction et Classification de la solution d'un modèle
 atmosphérique simplifié}
+
+\subsection{Reconstruction}
+
+\begin{algorithm}[H]
+    $\epsilon = value$\;
+    $\alpha = vector$\;
+    $U'_0 = U_0^T . U_0$\;
+    $Z'_0 = U_0^T . Z_0$\;
+    $r = Z'_{0} - U'_0 . \alpha$\;
+    \While{ $\displaystyle \frac{\|r\|_2}{\|Z'_0\|}  > \epsilon$ }{
+        $\displaystyle \lambda = \frac{r^T.r}{(U_0 . r)^T . (U_0 . r)}$\;
+        $\alpha = \alpha + \lambda r$\;
+        $r = Z'_0 - U'_0 . \alpha$\;
+    }
+    \caption{Détermination de \alpha}
+\end{algorithm}
+
 
 \section{Méthode dérivée de la puissance itérée, analyse et implémentation}
 
