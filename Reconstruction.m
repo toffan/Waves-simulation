@@ -1,9 +1,10 @@
-%%% Set check to true for validation %%%
+clear all;
+close all;
 
+%%% Set check to true for validation %%%
 check=true;
 
 % Number of simulations
-%%%
 % TODO : assess the impact fot this parameter on the results
 % of the reconstruction
 Nens = 50;
@@ -22,9 +23,9 @@ F = Model(GW,Nens);
 % Ensemble mean
 muF = mean(F,2);
 % Compute the anomaly matrix
-Z   = F - repmat(muF,1,Nens);
+Z  = F - repmat(muF,1,Nens);
 
-%%%%%%%  Compute the SVD of A    %%%%%%%
+%%%%%%%  Compute the SVD of A   %%%%%%%
 if (check)
     [U,S,~] = svd(Z,0);
     D = diag(S);
@@ -40,18 +41,35 @@ if (check)
     U = U(:,1:converged);
     fprintf('dimension of the subspace: %d\n',converged);
 else
-    %%%%
     % TODO: power iteration method
-    %%%%
 end
-
 
 %%%%%%%       Reconstruction        %%%%%%%
 [X, ns, nt] = Model(GW,1);
 X0 = X(1:ns,:);
 %%%%
-% TODO: reconstruct X with X0
-Zp = zeros(size(X));
+
+% reconstruction of X with X0 using the steepest descent method to solve:
+% U0t*U0*α = U0t*Z0 (normal equation)
+Z0 = X0 - muF(1:ns,:); % initial anomaly vector
+epsilon = 1e-6;        % precision for α computation
+U0 = U(1:ns,:);
+U0t = transpose(U0);
+Usdp = U0t*U0;
+Z0p = U0t*Z0;
+alpha = zeros(converged,1); % initialisation
+r = Z0p - Usdp*alpha;
+nr = norm(r);
+pl = 0;
+while (nr / norm(Z0) > epsilon)
+  lambda = nr^2 / (norm(U0*r)^2);
+  alpha = alpha + lambda*r;
+  r = Z0p - Usdp*alpha;
+  nr = norm(r);
+  pl = pl + 1;
+end
+fprintf('nombre itérations : %d\n', pl);
+Zp = U*alpha;
 %%%%
 
 %%%% Compute the error %%%%
@@ -85,5 +103,6 @@ for tt=1:nt
     axis([0,Lx,0,Ly ,5000,6000]);
     pbaspect([3 1 3])
     title('Reconstruction')
+    
     drawnow
 end

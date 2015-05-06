@@ -1,3 +1,6 @@
+clear all;
+close all;
+
 %Use matlab svd function instead of power iteration method
 use_svd = true;
 %Number of simulations
