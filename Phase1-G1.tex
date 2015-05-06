@@ -85,11 +85,15 @@ atmosphérique simplifié}
             \item Quand à la complexité en espace, la version naive de l'algorithme, qui consiste à calculer A avant toute chose, nous donne une complexité en $O(m^2)$, étant donné que c'est la matrice la plus volumineuse.
         \end{itemize}
 \bigskip
+\ \\
+\ \\
     Le premier point de comparaison est celui du temps de calcul. Comme nous l'avons vu, asymptotiquement, les deux algorithmes se comportent similairement en terme de temps. Cependant, notre algorithme ne va pas calculer toutes les valeurs singulières, sauf dans de très rares cas. Il semble donc sensé de supposer que si les deux algorithmes se valent dans le pire des cas, le notre a un léger avantage sur svd lorsque \textit{PercentTrace} est relativement éloigné de 1. \\
 
-    Ensuite vient la question de l'espace. Ici, clairement, notre algorithme a un désavantage lié au calcul explicite et au stockage de A, qui fait augmenter la complexité asymptotique en espace. Si l'on considère en plus que m dans le cas pratique dont nous essayons de faire quelque chose est de l'ordre de $10^5$, ce désavantage est écrasant. Nous verrons dans la sous-section suivante comment se passer du stockage de A. \\
+    Ensuite vient la question de l'espace. Ici, clairement, notre algorithme a un désavantage lié au calcul explicite et au stockage de A, qui fait augmenter la complexité asymptotique en espace. Si l'on considère en plus que m dans le cas pratique que nous implémentons ici est de l'ordre de $10^5$, ce désavantage est écrasant. Nous verrons dans la sous-section suivante comment se passer du stockage de A. \\
 
-    
+    Enfin, en ce qui concerne les avantages moins significatifs de notre algorithme, il y a le fait que dans la majorité des cas, il stocke moins de valeurs singulières que svd. Et dans tous les cas, il stocke moins de vecteurs singuliers, étant donné qu'il ne calcule à aucun moment les vecteurs singuliers à droite. Nous pouvons aussi remarquer que notre algorithme sort directement un sous-espace "singulier", tandis qu'il faut reconstruire celui-çi avec la sortie de svd.
+
+    \subsection{Implémentation de l'algorithme}
 
 %%%%%%
 
