@@ -58,7 +58,18 @@
 \section{Reconstruction et Classification de la solution d'un modèle
 atmosphérique simplifié}
 
-\subsection{Reconstruction}
+\subsection{Détermination de \alpha}
+
+Résoudre le problème de minimisation en \alpha
+$\displaystyle \min_{\alpha \in \mathbb{R}^{n_d}} \|U_{|t=0}.\alpha - Z_0\|_2$
+revient à trouver $\alpha \in \mathbb{R}^{n_d}$ tel que
+$\displaystyle U_{|t=0}^T.U_{|t=0}.\alpha = U_{|t=0}^T.Z_0$ (équations
+normales).
+Or $U_{|t=0}^T.U_{|t=0}$ est, de manière évidente, une matrice symétrique
+positive et, de plus, par construction de $U$, ses valeurs propres sont non nulles d'où
+son caractère défini. On décide donc de résoudre ce système par la méthode de la
+\og steepest descent\fg, d'où l'algorithme 1.
+
 
 \begin{algorithm}[H]
     $\epsilon = value$\;
@@ -66,7 +77,7 @@ atmosphérique simplifié}
     $U'_0 = U_0^T . U_0$\;
     $Z'_0 = U_0^T . Z_0$\;
     $r = Z'_{0} - U'_0 . \alpha$\;
-    \While{ $\displaystyle \frac{\|r\|_2}{\|Z'_0\|}  > \epsilon$ }{
+    \While{ $\displaystyle \frac{\|r\|_2}{\|Z'_0\|_2}  > \epsilon$ }{
         $\displaystyle \lambda = \frac{r^T.r}{(U_0 . r)^T . (U_0 . r)}$\;
         $\alpha = \alpha + \lambda r$\;
         $r = Z'_0 - U'_0 . \alpha$\;
