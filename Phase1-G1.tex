@@ -38,6 +38,8 @@
 \usepackage{esvect}
 \usepackage{multirow}
 
+\newtheorem*{remark}{Remarque}
+
 \usepackage{listings}
 
 \renewcommand{\phi}{\varphi}
@@ -56,7 +58,34 @@
 \section{Reconstruction et Classification de la solution d'un modèle
 atmosphérique simplifié}
 
-\section{»» Donner un titre à cette section ««} % TODO
+\section{Méthode dérivée de la puissance itérée, analyse et implémentation}
+
+    \subsection{Avantages et inconvénients de la méthode}
+
+    \begin{remark}[Complexité en temps du calcul matriciel]
+    Ici, nous utilisons les routines de calcul matriciel de MATLAB, qui viennent de BLAS.\footnote{Voir la routine DGEMM, \url{http://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms}} Etant donné que ces routines, quoique optimisées pour s'adapter au matériel et réduire les temps de calcul, n'implémentent ni l'algorithme de Strassen en $O(n^{2.807})$ ni aucun des developpements récents dans le domaine qui vont jusqu'au $O(n^{2.373})$ de Virginia V. Williams, nous supposerons que la complexité en temps d'une multiplication matricielle de MATLAB est en $O(n^3)$ pour une matrice de $\mathbb{R}^{n*n}$ et $O(nmk)$ pour des matrices de $\mathbb{R}^{n*m}$ et $\mathbb{R}^{m*k}$.
+    \end{remark}
+
+    Ici, nous analysons l'algorithme de la puissance itérée adapté aux sous-espaces propres, à la fois en terme d'avantages et d'inconvenients. Evidemment, ces termes n'ont de sens qu'au niveau d'une comparaison. \\
+    D'où le choix d'un algorithme dit "de base", à l'aune duquel nous pourrons analyser celui qui fait l'objet de cette section.
+    Les particularités de cet algorithme "de base" sont : \\
+
+        \begin{itemize}
+            \item Il calcule toutes les valeurs singulières et tous les vecteurs singuliers.
+            \item Il est basé, d'après la documentation de MATLAB\footnote{MATLAB utilise la routine svd de LIPACK, dont l'algorithme est expliqué dans \\    J. Demmel, W. Kahan \textit{Accurate Singular Values of Bidiagonal Matrices}, submitted to SIAM J.Sci.Stat.Comput., v.11, n.5, pp.873-912, 1990}, sur l'application successive de transformation de Householder et de Rotation de Givens, avant d'appliquer une methode itérative de calcul des valeurs et vecteurs singuliers pour une matrice bidiagonale.
+            \item Sa complexité asymptotique en temps est, toujours d'après l'implémentation MATLAB, en $O(n*m^2)$.
+            \item Celle en espace, basée sur celles des différentes étapes de l'algorithme, est en $O(n*m)$.
+        \end{itemize}
+\bigskip
+    Par comparaison, notre nouvel algorithme a pour caractéristiques : \\
+
+        \begin{itemize}
+            \item Il calcule uniquement les valeurs singulières et les vecteurs singuliers à gauche nécessaire d'après le pourcentage d'information demandé.
+            \item En ce qui concerne la complexité en temps pour A $\in \mathbb{R}^{mxm}$, on trouve $O(MaxIter*(m^3))$. Ainsi, cet algorithme est pseudo polynomial (avec une complexité borné par un polynome de la taille de l'entrée et de la taille maximum des nombres pris en compte dans le problème.
+            \item Quand à la complexité en espace, la version naive de l'algorithme, qui consiste à calculer A avant toute chose, nous donne une complexité en $O(m^2))$
+        \end{itemize}
+\bigskip
+    Le premier point de comparaison
 
 %%%%%%
 
