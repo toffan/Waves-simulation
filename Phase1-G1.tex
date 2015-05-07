@@ -161,11 +161,11 @@ Il nous reste maintenant à écrire le pseudo-code de l'algorithme adapté. \\
         $H = H^T*H$\;
         $[X,\Lambda] = decomposition\ spectrale\ de\ H$\;
         $[X,\Lambda] = ordonnancement\ decroissant\ de\ [X,\Lambda]$\;
-        $V = V*X$
+        $V = V*X$\;
         \For {$i=converged + 1, n$}{
-            \eIf{$\frac{\norme{Z*Z^T*V(i) - A(i,i).V(i)}}{normeA}$}{
+            \eIf{$\frac{\norme{Z*Z^T*V(i) - \Lambda(i,i).V(i)}}{normeA} \leq \epsilon$}{
                 $converged = converged + 1$\;
-                $PercentReached = 1 - \frac{\norme{Z - \sum\limits{j=1}^i \sqrt{A(i,i)}V(i)V(i)^TZ^T}}{\sqrt{normeA}}$\;
+                $PercentReached = 1 - \frac{\norme{Z - \sum\limits_{j=1}^i \sqrt[4]{\Lambda(i,i)}V(i)V(i)^TZ^T}}{\sqrt{normeA}}$\;
             } {
                 break\;
             }
