@@ -17,8 +17,6 @@ if (basic)
   [Pi,~] = Classification_computation(Nens, percentInfo, use_svd, Fobs);
   figure(1)
   bar(Pi)
-  Nens = [5:10:95];
-  Nens = Nens(:);
 else
   % Inatialization of parameters
   number = 3; % max 5
@@ -48,17 +46,17 @@ else
   % Draw results
   figure(1)
 
-  subplot(1, 3, 1);
+  subplot(2, 2, 1);
   surf(Nens(1:number), percentInfo(1:number), results(:,:,1)); shading('interp');
   axis([Nens(1), Nens(number), percentInfo(1), percentInfo(number), min(min(results(:,:,1))), max(max(results(:,:,1)))]);
   title('Pi')
 
-  subplot(1, 3, 2);
+  subplot(2, 2, 2);
   surf(Nens(1:number), percentInfo(1:number), results(:,:,2)); shading('interp');
   axis([Nens(1), Nens(number), percentInfo(1), percentInfo(number), min(min(results(:,:,2))), max(max(results(:,:,2)))]);
   title('dim')
 
-  subplot(1, 3, 3);
+  subplot(2, 3, 5);
   surf(Nens(1:number), percentInfo(1:number), results(:,:,3)); shading('interp');
   axis([Nens(1), Nens(number), percentInfo(1), percentInfo(number), min(min(results(:,:,3))), max(max(results(:,:,3)))]);
   title('time')
