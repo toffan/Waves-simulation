@@ -305,3 +305,15 @@ nous semble donc adaptée pour deux points.
             }
             \caption{Méthode du sous-espace singulier dominant}
         \end{algorithm}
+
+        \subsection{Commentaires}
+
+        Il ne reste plus grand chose à dire sur cet algorithme, si ce n'est
+        qu'il est moins rapide que $svd$, tout en étant aussi efficace. Nous
+        supposons que cela vient du fait que $svd$ est optimisée par des appels
+        à des langages plus rapides que MATLAB, à l'image du FORTRAN ou du C.
+        Il nous semble donc que ce n'est qu'une question de temps avant que
+        notre méthode soit aussi rapide que $svd$.
+
+
+\end{document}
