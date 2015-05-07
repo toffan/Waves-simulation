@@ -62,57 +62,43 @@
 \section{Reconstruction et Classification de la solution d'un modèle
 atmosphérique simplifié}
 
-    \subsection{Détermination de $\alpha$}
+\subsection{Détermination de $\alpha$}
 
-        Résoudre le problème de minimisation en $\alpha$
-        $\displaystyle \min_{\alpha \in \mathbb{R}^{n_d}} \|U_{|t=0}.\alpha - Z_0\|_2$
-        revient à trouver $\alpha \in \mathbb{R}^{n_d}$ tel que
-        $\displaystyle U_{|t=0}^T.U_{|t=0}.\alpha = U_{|t=0}^T.Z_0$ (équations
-        normales).
+Résoudre le problème de minimisation en $\alpha$
+$\displaystyle \min_{\alpha \in \mathbb{R}^{n_d}} \|U_{|t=0}.\alpha - Z_0\|_2$
+revient à trouver $\alpha \in \mathbb{R}^{n_d}$ tel que
+$\displaystyle U_{|t=0}^T.U_{|t=0}.\alpha = U_{|t=0}^T.Z_0$ (équations
+normales).
 
-        Or $U_{|t=0}^T.U_{|t=0}$ est, de manière évidente, une matrice
-        symétrique positive et, de plus, par construction de $U$, ses valeurs
-        propres sont non nulles d'où son caractère défini. L'algorithme de la
-        \og steepest descent \fg nous semble donc adaptée pour deux points.
+Or $U_{|t=0}^T.U_{|t=0}$ est, de manière évidente, une matrice symétrique
+positive et, de plus, par construction de $U$, ses valeurs propres sont non
+nulles d'où son caractère défini. L'algorithme de la \og steepest descent \fg
+nous semble donc adaptée pour deux points.
 
-        \begin{itemize}
-        \item Nous pouvons adapter le résidu de la solution. En effet, la
-            méthode de la puissance itérée permet de choisir la précision de
-            l'espace vectoriel d'approximation. Ainsi nous pouvons choisir une
-            précision cohérente.
-        \item Chaque tour de boucle à une complexité en temps de l'ordre de
-            $\mathcal{O}(n_d^2)$. Chaque étape est très rapide dès que
-            l'approximation est suffisamment efficace.
-        \end{itemize}
-
-
-        \begin{algorithm}[H]
-            \DontPrintSemicolon
-            $\epsilon = value$\;
-            $\alpha = vector$\;
-            $U'_0 = U_0^T . U_0$\;
-            $Z'_0 = U_0^T . Z_0$\;
-            $r = Z'_{0} - U'_0 . \alpha$\;
-            \While{ $\displaystyle \frac{\|r\|_2}{\|Z'_0\|_2}  > \epsilon$ }{
-                $\displaystyle \lambda = \frac{r^T.r}{r^T .  U'_0 . r}$\;
-                $\alpha = \alpha + \lambda r$\;
-                $r = Z'_0 - U'_0 . \alpha$\;
-            }
-            \caption{Détermination de $\alpha$}
-        \end{algorithm}
+\begin{itemize}
+    \item Nous pouvons adapter le résidu de la solution. En effet, la méthode
+        de la puissance itérée permet de choisir la précision de l'espace
+        vectoriel d'approximation. Ainsi nous pouvons choisir une précision
+        cohérente.
+    \item Chaque tour de boucle à une complexité en temps de l'ordre de
+        $\mathcal{O}(n_d^2)$. Chaque étape est très rapide dès que
+        l'approximation est suffisamment efficace.
+\end{itemize}
 
 
-    \subsection{Classification}
-
-        Nous cherchons à classer une observation selon une catégorie pour
-        laquelle nous avons un set représentatif. Nous cherchons donc à réduire
-        chaque espace vectoriel de référence pour ne garder que les
-        caractéristiques principales de chacun.
-
-        Puis nous calculons la distance de notre observation à chaque espace
-        réduit pour déterminer l'espace le plus probable et ainsi déterminer la
-        valeur d'un paramètre sur celle-ci.
-
+\begin{algorithm}[H]
+    $\epsilon = value$\;
+    $\alpha = vector$\;
+    $U'_0 = U_0^T . U_0$\;
+    $Z'_0 = U_0^T . Z_0$\;
+    $r = Z'_{0} - U'_0 . \alpha$\;
+    \While{ $\displaystyle \frac{\|r\|_2}{\|Z'_0\|_2}  > \epsilon$ }{
+        $\displaystyle \lambda = \frac{r^T.r}{(U_0 . r)^T . (U_0 . r)}$\;
+        $\alpha = \alpha + \lambda r$\;
+        $r = Z'_0 - U'_0 . \alpha$\;
+    }
+    \caption{Détermination de $\alpha$}
+\end{algorithm}
 
         \begin{algorithm}
             \DontPrintSemicolon
@@ -135,8 +121,8 @@ atmosphérique simplifié}
         Étant donné que ces routines, quoique optimisées pour s'adapter au
         matériel et réduire les temps de calcul, n'implémentent ni l'algorithme
         de Strassen en $\mathcal{O}(n^{2.807})$ ni aucun des développements
-        récents dans le domaine qui vont jusqu'au $\mathcal{O}(n^{2.373})$ de
-        Virginia V. Williams, nous supposerons que la complexité en temps d'une
+        récents dans le domaine qui vont jusqu'au $\mathcal{O}(n^{2.3728642})$ de
+        Virginia V. Williams et au $\mathcal{0}(n^{2.3728639})$ de LeGall, nous supposerons que la complexité en temps d'une
         multiplication matricielle de MATLAB est en $\mathcal{O}(n^3)$ pour une
         matrice de $\mathbb{R}^{n*n}$ et $\mathcal{O}(nmk)$ pour des matrices de
         $\mathbb{R}^{n*m}$ et $\mathbb{R}^{m*k}$.
@@ -279,15 +265,11 @@ atmosphérique simplifié}
 
             Nous en concluons que pour avoir une implémentation fonctionnelle de
             l'algorithme, il nous faut utiliser le critère d'arrêt suivant :
-            $\displaystyle \frac{\sigma_1 - \norme{Z - Z_k}}{\sigma_1} \leq
-            PercentInfo$, où
-            $Z_k = \sum\limits_{i=1}^k \sqrt{\sigma_i}u_iu_i^TZ^T$, avec
-            $\sigma_i$ et $u_i$ respectivement la i-ème valeur singulière de $Z$
-            dans l'ordre décroissant et $u_i$ le vecteur singulier à gauche
-            associé.
-
-            Ce critère est utilisable sans overflow, étant donné que
-            la plus large matrice mise en jeu est de taille $n*m$.
+            $\displaystyle \frac{\sigma_{k+1}}{\sigma_1} \leq
+            1 - PercentInfo$ comme exprimé dans l'Equation (1). Le défaut de
+            ce critère étant qu'il nécessite de calculer une valeur propre de
+            plus avant d'arrêter. Mais il a l'avantage d'être correct et
+            d'être utilisable sans overflow ni temps de calcul trop important.
         \end{itemize}
     \bigskip
 
@@ -323,31 +305,3 @@ atmosphérique simplifié}
             }
             \caption{Méthode du sous-espace singulier dominant}
         \end{algorithm}
-
-
-%%%%%%
-
-% exemple d'un algorithme
-
-\begin{algorithm}[H]  % toujours mettre le H
-  \DontPrintSemicolon % pour pas afficher ;
-  initialization\;    % toujours terminer avec \;
-  \BlankLine          % pour sauter une ligne
-  \While{not at end of this document}{
-    read current\;
-    \eIf{understand}{ % eIf = if, else, end / If = if, end
-      go to next section\;
-      current section becomes this one\;
-    }{
-      go back to the beginning of current section\;
-    }
-  }
-  \caption{How to write algorithms} % apparait dans la liste des algorithmes
-\end{algorithm}
-
-\newpage
-\section*{Annexes}
-
-\listofalgorithms
-
-\end{document}
