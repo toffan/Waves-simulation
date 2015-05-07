@@ -5,16 +5,12 @@ close all;
 check=true;
 
 % Number of simulations
-% TODO : assess the impact fot this parameter on the results
-% of the reconstruction
 Nens = 50;
 
 % Wind parameter
 GW = 1;
 % Stopping criterions
 maxIter=100;
-% TODO : assess the impact of this parameter on the results
-% of the reconstruction
 percentInfo = 0.95;
 
 % Generate the simulations
@@ -93,7 +89,7 @@ X0 = X(1:ns,:);
 % reconstruction of X with X0 using the steepest descent method to solve:
 % U0t*U0*α = U0t*Z0 (normal equation)
 Z0 = X0 - muF(1:ns,:); % initial anomaly vector
-epsilon = 1e-6;        % precision for α computation
+epsilon = 1e-14;        % precision for α computation
 U0 = U(1:ns,:);
 U0t = transpose(U0);
 Usdp = U0t*U0;
@@ -101,15 +97,16 @@ Z0p = U0t*Z0;
 alpha = zeros(converged,1); % initialisation
 r = Z0p - Usdp*alpha;
 nr = norm(r);
-pl = 0;
-while (nr / norm(Z0) > epsilon)
-  lambda = nr^2 / (norm(U0*r)^2);
+p = 0;
+time = cputime;
+while (nr / norm(Z0p) > epsilon)
+  lambda = nr^2 / (r.'*Usdp*r);
   alpha = alpha + lambda*r;
   r = Z0p - Usdp*alpha;
   nr = norm(r);
-  pl = pl + 1;
+  p = p + 1;
 end
-fprintf('nombre itérations : %d\n', pl);
+fprintf('nombre itérations : %d en %d secondes\n', p, cputime - time);
 Zp = U*alpha;
 %%%%
 
