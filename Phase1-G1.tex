@@ -114,6 +114,16 @@ atmosphérique simplifié}
         valeur d'un paramètre sur celle-ci.
 
 
+        \begin{algorithm}
+            \DontPrintSemicolon
+            \For{$i \in \mathbb{N}_3$}{
+                Calculer $U_i$ avec la \og power iteration method \fg\;
+                $Z_{obs,i} = F_{obs} - \bar{F}_i$\;
+                $\pi_i = \|Z_{obs,i} - U_i^T.U_i.Z_{obs,i}\|_2$\;
+            }
+            \caption{Algorithme de classification}
+        \end{algorithm}
+
 \section{Méthode dérivée de la puissance itérée, analyse et implémentation}
 
     \subsection{Avantages et inconvénients de la méthode}
