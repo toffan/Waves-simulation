@@ -21,7 +21,7 @@ else
   number = 5;
   % results.mat contain series of number tests for parameters
   Nens = [5:15:65]; Nens = Nens(:);
-  percentInfo = [0.90:0.02:0.99]; percentInfo = percentInfo(:);
+  percentInfo = [0.90:0.02:0.98]; percentInfo = percentInfo(:);
   % results = zeros(number, number, 3); has to be executed before
   load('results.mat');
 
@@ -29,17 +29,17 @@ else
   figure(1)
 
   subplot(2, 2, 1);
-  surf(Nens(1:number), percentInfo(1:number), results(:,:,1)); shading('interp');
+  surf(percentInfo(1:number), Nens(1:number), results(:,:,1)); shading('interp');
   axis([percentInfo(1), percentInfo(number), Nens(1), Nens(number), min(min(results(:,:,1))), 1 + max(max(results(:,:,1)))]);
   title('GWi')
 
   subplot(2, 2, 2);
-  surf(Nens(1:number), percentInfo(1:number), results(:,:,1)); shading('interp');
+  surf(percentInfo(1:number), Nens(1:number), results(:,:,2)); shading('interp');
   axis([percentInfo(1), percentInfo(number), Nens(1), Nens(number), min(min(results(:,:,2))), 1 + max(max(results(:,:,2)))]);
   title('Pi')
 
   subplot(2, 2, 3);
-  surf(Nens(1:number), percentInfo(1:number), results(:,:,2)); shading('interp');
+  surf(percentInfo(1:number), Nens(1:number), results(:,:,3)); shading('interp');
   axis([percentInfo(1), percentInfo(number), Nens(1), Nens(number), min(min(results(:,:,3))), 1 + max(max(results(:,:,3)))]);
   title('dim')
 end

@@ -37,7 +37,6 @@ function [Pi,dim] = Classification_computation(Nens, percentInfo, use_svd, Fobs)
 
       % Only keep dominant left eigenvectors
       Ui = Ui(:,1:k);
-      fprintf('dimension of the subspace: %d\n', k);
     else
       % TODO: power iteration method
     end
