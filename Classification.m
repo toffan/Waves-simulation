@@ -34,7 +34,7 @@ else
       for n_try=1:number
         time = cputime;
         [Pi,dim] = Classification_computation(Nens(Nens_i), percentInfo(percentInfo_i), use_svd, Fobs);
-        time = cputime - time
+        fprintf('time: %d\n', cputime - time);
         dim = mean(dim);
         Pi = min(Pi);
         local_results(n_try,:) = [Pi dim time];
