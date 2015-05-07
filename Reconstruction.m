@@ -39,7 +39,7 @@ if (check)
     fprintf('dimension of the subspace: %d\n',converged);
 else
     p = 1;
-    epsilon = 7;
+    epsilon = 1e-3;
     [m,n] = size(Z);
     V = zeros(m,n);
     for i=1:n
@@ -50,7 +50,8 @@ else
     PercentReached = 0;
     normeA = norm(Z.'*Z);
     Gamma = zeros(n);
-    while converged == 0 || sqrt(Gamma(converged,converged) / Gamma(1,1)) > 1 - percentInfo && niter < maxIter
+    VapTrouvees = zeros(1,n);
+    while converged == 0 || (sqrt(VapTrouvees(1,converged) / VapTrouvees(1,1)) > 1 - percentInfo && niter < maxIter)
         for i=1:p
             V = (Z.')*V;
             V = Z*V;
@@ -64,23 +65,27 @@ else
         H = (Z.')*V;
         H = (H.')*H;
         [X,Gamma] = eig(H);
-        [Gamma,I] = sort(Gamma,'descend');
-        X = X*I;
+        [tri,indices] = sort(diag(Gamma),'descend');
+        Gamma = diag(tri);
+        X = X(:,indices);
         V = V*X;
         for i=converged+1:n
             fprintf('a');
             temp = (Z.')*V(:,i);
             if (norm(Z*temp - Gamma(i,i)*V(:,i))/normeA <= epsilon)
                 converged = converged + 1;
+                VapTrouvees(1,i) = Gamma(i,i);
+                break;
             else
                 fprintf('break\n');
                 break;
             end
         end
         niter = niter + 1;
-        Gamma(1:5,1:5)
     end
+    converged = converged - 1;
     U = V(:,1:converged);
+    diag(Gamma)
 end
 fprintf('duree : %d\n', cputime - time);
 fprintf('converged : %d\n', converged);
