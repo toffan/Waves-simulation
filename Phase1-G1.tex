@@ -38,9 +38,13 @@
 \usepackage{esvect}
 \usepackage{multirow}
 
+\DeclareMathOperator{\Tr}{Tr}
+
 \newtheorem*{remark}{Remarque}
 
 \usepackage{listings}
+
+\newcommand{\norme}[1]{\left\Vert #1\right\Vert}
 
 \renewcommand{\phi}{\varphi}
 \renewcommand{\epsilon}{\varepsilon}
@@ -100,7 +104,7 @@ méthode de la \og steepest descent\fg, d'où l'algorithme 1.
 
         \begin{itemize}
             \item Il calcule toutes les valeurs singulières et tous les vecteurs singuliers.
-            \item Il est basé, d'après la documentation de MATLAB\footnote{MATLAB utilise la routine svd de LIPACK, dont l'algorithme est expliqué dans \\    J. Demmel, W. Kahan \textit{Accurate Singular Values of Bidiagonal Matrices}, submitted to SIAM J.Sci.Stat.Comput., v.11, n.5, pp.873-912, 1990}, sur l'application successive de transformation de Householder et de Rotation de Givens, avant d'appliquer une methode itérative de calcul des valeurs et vecteurs singuliers pour une matrice bidiagonale.
+            \item Il est basé, d'après la documentation de MATLAB\footnote{MATLAB utilise la routine $svd$ de LIPACK, dont l'algorithme est expliqué dans \\    J. Demmel, W. Kahan \textit{Accurate Singular Values of Bidiagonal Matrices}, submitted to SIAM J.Sci.Stat.Comput., v.11, n.5, pp.873-912, 1990}, sur l'application successive de transformation de Householder et de Rotation de Givens, avant d'appliquer une methode itérative de calcul des valeurs et vecteurs singuliers pour une matrice bidiagonale.
             \item Sa complexité asymptotique en temps est, toujours d'après l'implémentation MATLAB, en $O(MaxIter*(n*m^2))$, où MaxIter est le nombre d'itérations maximal de la seconde partie de l'algorithme.
             \item Celle en espace, basée sur celles des différentes étapes de l'algorithme, est en $O(n*m)$.
         \end{itemize}
@@ -115,23 +119,28 @@ méthode de la \og steepest descent\fg, d'où l'algorithme 1.
 \bigskip
 \ \\
 \ \\
-    Le premier point de comparaison est celui du temps de calcul. Comme nous l'avons vu, asymptotiquement, les deux algorithmes se comportent similairement en terme de temps. Cependant, notre algorithme ne va pas calculer toutes les valeurs singulières, sauf dans de très rares cas. Il semble donc sensé de supposer que si les deux algorithmes se valent dans le pire des cas, le notre a un léger avantage sur svd lorsque \textit{PercentTrace} est relativement éloigné de 1. \\
+    Le premier point de comparaison est celui du temps de calcul. Comme nous l'avons vu, asymptotiquement, les deux algorithmes se comportent similairement en terme de temps. Cependant, notre algorithme ne va pas calculer toutes les valeurs singulières, sauf dans de très rares cas. Il semble donc sensé de supposer que si les deux algorithmes se valent dans le pire des cas, le notre a un léger avantage sur $svd$ lorsque \textit{PercentTrace} est relativement éloigné de 1. \\
 
     Ensuite vient la question de l'espace. Ici, clairement, notre algorithme a un désavantage lié au calcul explicite et au stockage de $A$, qui fait augmenter la complexité asymptotique en espace. Si l'on considère en plus que m dans le cas pratique que nous implémentons ici est de l'ordre de $10^5$, ce désavantage est écrasant. Nous verrons dans la sous-section suivante comment se passer du stockage de $A$. \\
 
-    Enfin, en ce qui concerne les avantages moins significatifs de notre algorithme, il y a le fait que dans la majorité des cas, il stocke moins de valeurs singulières que svd. Et dans tous les cas, il stocke moins de vecteurs singuliers, étant donné qu'il ne calcule à aucun moment les vecteurs singuliers à droite. Nous pouvons aussi remarquer que notre algorithme sort directement un sous-espace "singulier", tandis qu'il faut reconstruire celui-çi avec la sortie de svd.
+    Enfin, en ce qui concerne les avantages moins significatifs de notre algorithme, il y a le fait que dans la majorité des cas, il stocke moins de valeurs singulières que $svd$. Et dans tous les cas, il stocke moins de vecteurs singuliers, étant donné qu'il ne calcule à aucun moment les vecteurs singuliers à droite. Nous pouvons aussi remarquer que notre algorithme sort directement un sous-espace "singulier", tandis qu'il faut reconstruire celui-çi avec la sortie de $svd$.
 
     \subsection{Implémentation de l'algorithme}
 
-    Comme expliqué dans la sous-section précédente, l'utilisation naive de l'algorithme dérivé de la puissance itérée pour remplacer svd nécessite le calcul de $A = Z*Z^T$, dont l'ordre de grandeur du nombre de coefficients est de $10^{10}$. Ceci fait que le calcul même de $A$ entraine un overflow dans MATLAB, nous forçant à adapter l'algorithme pour l'utiliser. \\
+    Comme expliqué dans la sous-section précédente, l'utilisation naive de l'algorithme dérivé de la puissance itérée pour remplacer $svd$ nécessite le calcul de $A = Z*Z^T$, dont l'ordre de grandeur du nombre de coefficients est de $10^{10}$. Ceci fait que le calcul même de $A$ entraine un overflow dans MATLAB, nous forçant à adapter l'algorithme pour l'utiliser. \\
 
     Voici les moments où nous avons dû modifier l'algorithme fourni pour éviter de calculer $A$ : \\
 
         \begin{itemize}
             \item Le calcul de $Y = A^p*V$. Ici, il suffit de remplacer $A$ par $Z*Z^T$, et d'effectuer les calculs. A aucun moment les matrices intermédiaires n'auront une taille supérieure à $n*m$, ce qui est assez petit pour ne pas causer d'overflow dans MATLAB.
             \item Le calcul du coefficient de Rayleigh $H = V^T*A*V$. Ici, pour gagner en espace, il suffit de décomposer $H = V^T*Z*Z^T*V$, d'où $H = (Z^T*V)^T*(Z^T*V)$. Nous en déduisons que calculer $Z^T*V$ puis d'une transposition et d'un produit matriciel pour calculer le coefficient de Rayleigh.
+            \item Le critère d'arret pour le calcul d'une valeur propre, $\frac{\norme{A*v_i - \lambda_i*v_i}}{\norme{A}}$. Le fait que $A$ soit une matrice symétrique nous permet de savoir, d'après le théorème spectral, que $\norme{A} = \lambda_1$, où $\lambda_1$ est la plus grande valeur propre de $A$. Pour ce qui est du dividende, il nous suffit de faire 2 produits matriciels (par $Z^T$ et $Z$) à la place d'un seul, puis de calculer la norme.
+            \item Le critère d'arret pour l'algorithme en lui même doit être modifié. L'intuition derrière cette necessitée est le fait que lorsque la plus grande valeur propre est sensiblement plus grande que les autres, $\frac{\sum\limits_{i=1}^n \lambda_i}{\Tr(A)}$ tend à être plus grand que le resultat de l'Equation (1), causant l'arret prématuré de l'algorithme. \\
+            Nous pouvons prendre comme exemple le cas où n = 4, les valeurs propres calculées pour le moment valent 4 et 1 (d'où ici k = 2), $\Tr(A) = 7$ et $\lambda_{k+1} = 1$. Ainsi, le critère d'arret non modifié donne 5/7, tandis que l'Equation 1 donne 1/2. Il suffit donc que $PercentInfo$ se trouve dans l'intervalle $[1/2,5/7]$ pour que l'algorithme soit faussé. \\
+            Nous en concluons que pour avoir une implémentation fonctionnelle de l'algorithme, il nous faut utiliser le critère d'arret suivant : $\frac{\sigma_1 - \norme{Z - Z_k}}{\sigma_1} \leq PercentInfo$, où $Z_k = \sum\limits_{i=1}^k \sqrt{\sigma_i}u_iu_i^TZ^T$, avec $\sigma_i$ et $u_i$ respectivement la i-ème valeur singulière de $Z$ dans l'ordre décroissant et $u_i$ le vecteur singulier à gauche associé. \\
+            Ce critère est utilisable sans overflow, étant donné que la plus large matrice mise en jeu est de taille $n*m$.
         \end{itemize}
-
+\bigskip
 %%%%%%
 
 % exemple d'un algorithme
