@@ -2,7 +2,7 @@ clear all;
 close all;
 
 %%% Set check to true for validation %%%
-check=true;
+check=false;
 
 % Number of simulations
 Nens = 50;
@@ -22,6 +22,7 @@ muF = mean(F,2);
 Z  = F - repmat(muF,1,Nens);
 
 %%%%%%%  Compute the SVD of A   %%%%%%%
+time = cputime
 if (check)
     [U,S,~] = svd(Z,0);
     D = diag(S);
@@ -38,7 +39,7 @@ if (check)
     fprintf('dimension of the subspace: %d\n',converged);
 else
     p = 1;
-    epsilon = 1e-6;
+    epsilon = 7;
     [m,n] = size(Z);
     V = zeros(m,n);
     for i=1:n
@@ -47,8 +48,9 @@ else
     niter = 0;
     converged = 0;
     PercentReached = 0;
-    normeA = norm(Z*Z.');
-    while PercentReached < percentInfo || niter < MaxIter
+    normeA = norm(Z.'*Z);
+    Gamma = zeros(n);
+    while converged == 0 || sqrt(Gamma(converged,converged) / Gamma(1,1)) > 1 - percentInfo && niter < maxIter
         for i=1:p
             V = (Z.')*V;
             V = Z*V;
@@ -62,24 +64,26 @@ else
         H = (Z.')*V;
         H = (H.')*H;
         [X,Gamma] = eig(H);
-        [X,Gamma] = sortem(H);
+        [Gamma,I] = sort(Gamma,'descend');
+        X = X*I;
         V = V*X;
         for i=converged+1:n
-            if (norm(Z*(Z.')*V(:,i) - Gamma(i,i)*V(:,i))/normeA <= epsilon)
+            fprintf('a');
+            temp = (Z.')*V(:,i);
+            if (norm(Z*temp - Gamma(i,i)*V(:,i))/normeA <= epsilon)
                 converged = converged + 1;
-                Zk = zeros(m,n);
-                for j=1:i
-                    Zk = Zk + nthroot(Gamma(j,j),4)*V(:,i)*((V(:,i).')*(Z.'));
-                end
-                PercentReached = 1 - (norm(Z - Zk)/sqrt(normeA));
             else
+                fprintf('break\n');
                 break;
             end
         end
         niter = niter + 1;
+        Gamma(1:5,1:5)
     end
     U = V(:,1:converged);
 end
+fprintf('duree : %d\n', cputime - time);
+fprintf('converged : %d\n', converged);
 
 %%%%%%%       Reconstruction        %%%%%%%
 [X, ns, nt] = Model(GW,1);
