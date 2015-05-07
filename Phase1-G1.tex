@@ -134,13 +134,48 @@ méthode de la \og steepest descent\fg, d'où l'algorithme 1.
         \begin{itemize}
             \item Le calcul de $Y = A^p*V$. Ici, il suffit de remplacer $A$ par $Z*Z^T$, et d'effectuer les calculs. A aucun moment les matrices intermédiaires n'auront une taille supérieure à $n*m$, ce qui est assez petit pour ne pas causer d'overflow dans MATLAB.
             \item Le calcul du coefficient de Rayleigh $H = V^T*A*V$. Ici, pour gagner en espace, il suffit de décomposer $H = V^T*Z*Z^T*V$, d'où $H = (Z^T*V)^T*(Z^T*V)$. Nous en déduisons que calculer $Z^T*V$ puis d'une transposition et d'un produit matriciel pour calculer le coefficient de Rayleigh.
-            \item Le critère d'arret pour le calcul d'une valeur propre, $\frac{\norme{A*v_i - \lambda_i*v_i}}{\norme{A}}$. Le fait que $A$ soit une matrice symétrique nous permet de savoir, d'après le théorème spectral, que $\norme{A} = \lambda_1$, où $\lambda_1$ est la plus grande valeur propre de $A$. Pour ce qui est du dividende, il nous suffit de faire 2 produits matriciels (par $Z^T$ et $Z$) à la place d'un seul, puis de calculer la norme.
+            \item Le critère d'arret pour le calcul d'une valeur propre, $\frac{\norme{A*v_i - \lambda_i*v_i}}{\norme{A}}$. Le fait que $A$ soit une matrice symétrique nous permet de savoir, d'après le théorème spectral, que $\norme{A} = \lambda_1$, où $\lambda_1$ est la plus grande valeur propre de $A$. Pour ce qui est du dividende, il nous suffit de faire 2 produits matriciels (par $Z^T$ et $Z$) à la place d'un seul, puis de calculer la norme. \\
+            Cependant, étant donné qu'il nous faut $\norme{A}$ dès la première itération de l'algorithme, avant donc d'avoir calculé la plus grande valeur singulière, nous appliquons la propriété bien connue que $Z*Z^T$ et $Z^T*Z$ ont toutes deux les mêmes valeurs propres, et sont toutes deux diagonalisables. Nous en déduisons que $\norme{A} = \norme{Z^T*Z}$, avec $Z^T*Z \in \mathbb{R}^{n*n}$, donc calculable sans overflow.
             \item Le critère d'arret pour l'algorithme en lui même doit être modifié. L'intuition derrière cette necessitée est le fait que lorsque la plus grande valeur propre est sensiblement plus grande que les autres, $\frac{\sum\limits_{i=1}^n \lambda_i}{\Tr(A)}$ tend à être plus grand que le resultat de l'Equation (1), causant l'arret prématuré de l'algorithme. \\
             Nous pouvons prendre comme exemple le cas où n = 4, les valeurs propres calculées pour le moment valent 4 et 1 (d'où ici k = 2), $\Tr(A) = 7$ et $\lambda_{k+1} = 1$. Ainsi, le critère d'arret non modifié donne 5/7, tandis que l'Equation 1 donne 1/2. Il suffit donc que $PercentInfo$ se trouve dans l'intervalle $[1/2,5/7]$ pour que l'algorithme soit faussé. \\
             Nous en concluons que pour avoir une implémentation fonctionnelle de l'algorithme, il nous faut utiliser le critère d'arret suivant : $\frac{\sigma_1 - \norme{Z - Z_k}}{\sigma_1} \leq PercentInfo$, où $Z_k = \sum\limits_{i=1}^k \sqrt{\sigma_i}u_iu_i^TZ^T$, avec $\sigma_i$ et $u_i$ respectivement la i-ème valeur singulière de $Z$ dans l'ordre décroissant et $u_i$ le vecteur singulier à gauche associé. \\
             Ce critère est utilisable sans overflow, étant donné que la plus large matrice mise en jeu est de taille $n*m$.
         \end{itemize}
 \bigskip
+
+Il nous reste maintenant à écrire le pseudo-code de l'algorithme adapté. \\
+
+\begin{algorithm}[H]  % toujours mettre le H
+    $V = matrice\ orthogonale\ quelconque \in \mathbb{R}^{m*n}$\;
+    $niter = 0$\;
+    $converged = 0$\;
+    $PercentReached = 0$\;
+    $normeA = \norme{Z^T*Z}$\;
+    \Repeat{$PercentReached \leq PercentInfo$ or $niter < MaxIter$}{
+        \For{$i=1, p$}{
+            $V = Z^T*Y$\;
+            $V = Z*Y$\;
+        }
+        $V = gram-schmidt(V)\footnote{Nous ne rappellons pas l'algorithme d'orthogonalisation de Gram-Schmidt, mais celui-çi est implémenté dans le code}$\;
+        $H = Z^T*V$\;
+        $H = H^T*H$\;
+        $[X,\Lambda] = decomposition\ spectrale\ de\ H$\;
+        $[X,\Lambda] = ordonnancement\ decroissant\ de\ [X,\Lambda]$\;
+        $V = V*X$
+        \For {$i=converged + 1, n$}{
+            \eIf{$\frac{\norme{Z*Z^T*V(i) - A(i,i).V(i)}}{normeA}$}{
+                $converged = converged + 1$\;
+                $PercentReached = 1 - \frac{\norme{Z - \sum\limits{j=1}^i \sqrt{A(i,i)}V(i)V(i)^TZ^T}}{\sqrt{normeA}}$\;
+            } {
+                break\;
+            }
+        }
+        $niter = niter + 1$\;
+    }
+    \caption{Méthode du sous-espace singulier dominant}
+\end{algorithm}
+
+
 %%%%%%
 
 % exemple d'un algorithme
