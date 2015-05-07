@@ -69,10 +69,21 @@ $\displaystyle \min_{\alpha \in \mathbb{R}^{n_d}} \|U_{|t=0}.\alpha - Z_0\|_2$
 revient à trouver $\alpha \in \mathbb{R}^{n_d}$ tel que
 $\displaystyle U_{|t=0}^T.U_{|t=0}.\alpha = U_{|t=0}^T.Z_0$ (équations
 normales).
+
 Or $U_{|t=0}^T.U_{|t=0}$ est, de manière évidente, une matrice symétrique
 positive et, de plus, par construction de $U$, ses valeurs propres sont non
-nulles d'où son caractère défini. On décide donc de résoudre ce système par la
-méthode de la \og steepest descent\fg, d'où l'algorithme 1.
+nulles d'où son caractère défini. L'algorithme de la \og steepest descent \fg
+nous semble donc adaptée pour deux points.
+
+\begin{itemize}
+    \item Nous pouvons adapter le résidu de la solution. En effet, la méthode
+        de la puissance itérée permet de choisir la précision de l'espace
+        vectoriel d'approximation. Ainsi nous pouvons choisir une précision
+        cohérente.
+    \item Chaque tour de boucle à une complexité en temps de l'ordre de
+        $\mathcal{O}(n_d^2)$. Chaque étape est très rapide dès que
+        l'approximation est suffisamment efficace.
+\end{itemize}
 
 
 \begin{algorithm}[H]
