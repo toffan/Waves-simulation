@@ -56,7 +56,7 @@ else
   axis([Nens(1), Nens(number), percentInfo(1), percentInfo(number), min(min(results(:,:,2))), max(max(results(:,:,2)))]);
   title('dim')
 
-  subplot(2, 3, 5);
+  subplot(2, 2, 3);
   surf(Nens(1:number), percentInfo(1:number), results(:,:,3)); shading('interp');
   axis([Nens(1), Nens(number), percentInfo(1), percentInfo(number), min(min(results(:,:,3))), max(max(results(:,:,3)))]);
   title('time')
