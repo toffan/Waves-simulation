@@ -62,43 +62,44 @@
 \section{Reconstruction et Classification de la solution d'un modèle
 atmosphérique simplifié}
 
-\subsection{Détermination de $\alpha$}
+    \subsection{Détermination de $\alpha$}
 
-Résoudre le problème de minimisation en $\alpha$
-$\displaystyle \min_{\alpha \in \mathbb{R}^{n_d}} \|U_{|t=0}.\alpha - Z_0\|_2$
-revient à trouver $\alpha \in \mathbb{R}^{n_d}$ tel que
-$\displaystyle U_{|t=0}^T.U_{|t=0}.\alpha = U_{|t=0}^T.Z_0$ (équations
-normales).
+        Résoudre le problème de minimisation en $\alpha$
+        $\displaystyle \min_{\alpha \in \mathbb{R}^{n_d}} \|U_{|t=0}.\alpha - Z_0\|_2$
+        revient à trouver $\alpha \in \mathbb{R}^{n_d}$ tel que
+        $\displaystyle U_{|t=0}^T.U_{|t=0}.\alpha = U_{|t=0}^T.Z_0$ (équations
+        normales).
 
-Or $U_{|t=0}^T.U_{|t=0}$ est, de manière évidente, une matrice symétrique
-positive et, de plus, par construction de $U$, ses valeurs propres sont non
-nulles d'où son caractère défini. L'algorithme de la \og steepest descent \fg
-nous semble donc adaptée pour deux points.
+        Or $U_{|t=0}^T.U_{|t=0}$ est, de manière évidente, une matrice
+        symétrique positive et, de plus, par construction de $U$, ses valeurs
+        propres sont non nulles d'où son caractère défini. L'algorithme de la
+        \og steepest descent \fg nous semble donc adaptée pour deux points.
 
-\begin{itemize}
-    \item Nous pouvons adapter le résidu de la solution. En effet, la méthode
-        de la puissance itérée permet de choisir la précision de l'espace
-        vectoriel d'approximation. Ainsi nous pouvons choisir une précision
-        cohérente.
-    \item Chaque tour de boucle à une complexité en temps de l'ordre de
-        $\mathcal{O}(n_d^2)$. Chaque étape est très rapide dès que
-        l'approximation est suffisamment efficace.
-\end{itemize}
+        \begin{itemize}
+        \item Nous pouvons adapter le résidu de la solution. En effet, la
+            méthode de la puissance itérée permet de choisir la précision de
+            l'espace vectoriel d'approximation. Ainsi nous pouvons choisir une
+            précision cohérente.
+        \item Chaque tour de boucle à une complexité en temps de l'ordre de
+            $\mathcal{O}(n_d^2)$. Chaque étape est très rapide dès que
+            l'approximation est suffisamment efficace.
+        \end{itemize}
 
 
-\begin{algorithm}[H]
-    $\epsilon = value$\;
-    $\alpha = vector$\;
-    $U'_0 = U_0^T . U_0$\;
-    $Z'_0 = U_0^T . Z_0$\;
-    $r = Z'_{0} - U'_0 . \alpha$\;
-    \While{ $\displaystyle \frac{\|r\|_2}{\|Z'_0\|_2}  > \epsilon$ }{
-        $\displaystyle \lambda = \frac{r^T.r}{(U_0 . r)^T . (U_0 . r)}$\;
-        $\alpha = \alpha + \lambda r$\;
-        $r = Z'_0 - U'_0 . \alpha$\;
-    }
-    \caption{Détermination de $\alpha$}
-\end{algorithm}
+        \begin{algorithm}[H]
+            \DontPrintSemicolon
+            $\epsilon = value$\;
+            $\alpha = vector$\;
+            $U'_0 = U_0^T . U_0$\;
+            $Z'_0 = U_0^T . Z_0$\;
+            $r = Z'_{0} - U'_0 . \alpha$\;
+            \While{ $\displaystyle \frac{\|r\|_2}{\|Z'_0\|_2}  > \epsilon$ }{
+                $\displaystyle \lambda = \frac{r^T.r}{r^T .  U'_0 . r}$\;
+                $\alpha = \alpha + \lambda r$\;
+                $r = Z'_0 - U'_0 . \alpha$\;
+            }
+            \caption{Détermination de $\alpha$}
+        \end{algorithm}
 
 
 \section{Méthode dérivée de la puissance itérée, analyse et implémentation}
@@ -271,6 +272,7 @@ nous semble donc adaptée pour deux points.
         Il nous reste maintenant à écrire le pseudo-code de l'algorithme adapté.
 
         \begin{algorithm}[H]
+            \DontPrintSemicolon
             $V = matrice\ orthogonale\ quelconque \in \mathbb{R}^{m*n}$\;
             $niter = 0$\;
             $converged = 0$\;
