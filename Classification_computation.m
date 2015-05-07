@@ -1,6 +1,6 @@
 function [Pi,dim] = Classification_computation(Nens, percentInfo, use_svd, Fobs)
 
-  % Initiatlization
+  % Initialization
   Pi = zeros(3, 1);
   dim = zeros(3, 1);
 
@@ -53,4 +53,5 @@ function [Pi,dim] = Classification_computation(Nens, percentInfo, use_svd, Fobs)
     % Computation of the distance of Zobsi to the subspace
     Pi(GWi) = norm(Zobsi - Projected);
   end
+
 end
