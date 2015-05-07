@@ -41,7 +41,48 @@ if (check)
     U = U(:,1:converged);
     fprintf('dimension of the subspace: %d\n',converged);
 else
-    % TODO: power iteration method
+    p = 1;
+    epsilon = 1e-6;
+    [m,n] = size(Z);
+    V = zeros(m,n);
+    for i=1:n
+        V(i,i) = 1;
+    end
+    niter = 0;
+    converged = 0;
+    PercentReached = 0;
+    normeA = norm(Z*Z.');
+    while PercentReached < percentInfo || niter < MaxIter
+        for i=1:p
+            V = (Z.')*V;
+            V = Z*V;
+        end
+        for i=1:n
+            for j=1:(i-1)
+                V(:,i) = V(:,i) - (dot(V(:,i),V(:,j))/norm(V(:,j)))*V(:,j);
+            end
+            V(:,i) = (1/norm(V(:,i)))*V(:,i);
+        end
+        H = (Z.')*V;
+        H = (H.')*H;
+        [X,Gamma] = eig(H);
+        [X,Gamma] = sortem(H);
+        V = V*X;
+        for i=converged+1:n
+            if (norm(Z*(Z.')*V(:,i) - Gamma(i,i)*V(:,i))/normeA <= epsilon)
+                converged = converged + 1;
+                Zk = zeros(m,n);
+                for j=1:i
+                    Zk = Zk + nthroot(Gamma(j,j),4)*V(:,i)*((V(:,i).')*(Z.'));
+                end
+                PercentReached = 1 - (norm(Z - Zk)/sqrt(normeA));
+            else
+                break;
+            end
+        end
+        niter = niter + 1;
+    end
+    U = V(:,1:converged);
 end
 
 %%%%%%%       Reconstruction        %%%%%%%
