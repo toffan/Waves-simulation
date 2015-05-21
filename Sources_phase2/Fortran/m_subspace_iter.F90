@@ -242,121 +242,119 @@
 #endif
 
 
-   print*,'TO DO'
-   
-!!    ierr = 0
-!!    !! initialization process ...
-!!    if((percentage.gt.1d0)  .or. (percentage.lt.0d0)) then
-!!       ierr=1
-!!       return
-!!    end if
-!!    if(l.gt.n) then
-!!       ierr=1
-!!       return
-!!    end if
+    ierr = 0
+    !! initialization process ...
+    if((percentage.gt.1d0)  .or. (percentage.lt.0d0)) then
+       ierr=1
+       return
+    end if
+    if(l.gt.n) then
+       ierr=1
+       return
+    end if
 
-!!    allocate(y(n,l), h(l,l), w(l), stat=ierr)
-!!    if(ierr .ne. 0) return
+    allocate(y(n,l), h(l,l), w(l), stat=ierr)
+    if(ierr .ne. 0) return
 
-!!    lwork = n*l
-    
-!!    ! a natural choice of lambda is an estimate of some norm of a.
-!!    ! use y as a workspace
-!!    lambda=dlange('f', n, n, a, n, y)
+    lwork = n*l
 
-!!    call orth_basis(v, n, l, y)
+    ! a natural choice of lambda is an estimate of some norm of a.
+    ! use y as a workspace
+    lambda=dlange('f', n, n, a, n, y)
 
-!!    n_ev      = 0
-!!    v         = y
-!!    res_ev    = 0d0
-!!    d         = 0d0
-!!    it_ev     = 0
-!!    condition = 0
-    
-!!    it=0
-!!    do while( (n_ev.lt.l) .and. (it.lt.maxit) )
+    call orth_basis(v, n, l, y)
 
-!!       it = it+1
-!!       !!compute  y=a*v
-!!       do i=1, p
-!!          call dgemm('n', 'n', n, l, n, 1.d0, a, n, v, n, 0.d0, y, n)
-!!          v=y
-!!       end do
+    n_ev      = 0
+    v         = y
+    res_ev    = 0d0
+    d         = 0d0
+    it_ev     = 0
+    condition = 0
 
-!!       !! orthogonalization using Gramm Schmidt procedure
-!!      !! compute  v=orth(y)
-!!       call orth_basis(y, n, l, v)
+    it=0
+    do while( (n_ev.lt.l) .and. (it.lt.maxit) )
 
-!!       !!compute  y=a*v
-!!       call dgemm('n','n', n, l, n, 1d0, a, n, v, n, 0d0, y, n)
-!!       !!compute  h=v'*y
-!!       call dgemm('t', 'n', l, l, n, 1d0, v, n, y, n, 0d0, h, l)
-!!       ! Compute eig-decomposition of h. Use y as a workspace
-!!       call dsyev('v', 'u', l, h, l, w, y, lwork, ierr)
-!!       if( ierr .ne.0 )then
-!!           goto 9999
-!!       end if
-!!       !! Sort in decreasing order (in-place)
-!!       !!(we suppose that all the eigen values are positive)
-!!       do i=1,l/2
-!!          tmp        = w(i)
-!!          w(i)       = w(l-i +1)
-!!          w(l-i+1)   = tmp
-!!          ! use the first column of y as a workspace
-!!         y(1:l,1)   = h(:,i)
-!!          h(:,i)     = h(:,l-i +1)
-!!          h(:,l-i+1) = y(1:l,1)
-!!       end do
+       it = it+1
+       !!compute  y=a*v
+       do i=1, p
+          call dgemm('n', 'n', n, l, n, 1.d0, a, n, v, n, 0.d0, y, n)
+          v=y
+       end do
 
-!!       !! v=v*h
-!!       y = v
-!!       call dgemm('n', 'n', n, l, l, 1d0, y, n, h, l, 0d0, v, n)
-!!       conv = 0
-!!       i    = n_ev +1
-!!       !! the larger eigenvalue will converge more swiftly than
-!!       !! those corresponding to the smaller eigenvalue.
-!!       !! for this reason, we test the convergence in the order
-!!       !! i=1,2,.. and stop with the first one to fail the test
-!!       do
-!!          if( i .gt. l) exit
-!!          !! compute res=norm(a*v(:,i) - v(:,i)*t(i,i),2)/lambda;
-!!          !! use the first column of y as a workspace
-!!          y(:,1) = v(:,i)
-!!          call dgemv('n', n, n, 1d0, a, n, v(1,i), 1, -w(i), y, 1)
-!!          res = dnrm2(n, y, ione)/lambda
-!!          if(res.gt.eps) exit
-!!          conv         = conv+1
-!!          d(i)         = w(i)
-!!          res_ev(i)    = res
-!!          it_ev(i)     = it
-!!          i            = i+1
-!!          condition    = 1.d0-d(n_ev+conv)/d(1)
-!!       end do
+      !! orthogonalization using Gramm Schmidt procedure
+      !! compute  v=orth(y)
+       call orth_basis(y, n, l, v)
 
-!!       n_ev = n_ev + conv
+      !!compute  y=a*v
+       call dgemm('n','n', n, l, n, 1d0, a, n, v, n, 0d0, y, n)
+      !!compute  h=v'*y
+       call dgemm('t', 'n', l, l, n, 1d0, v, n, y, n, 0d0, h, l)
+       ! Compute eig-decomposition of h. Use y as a workspace
+       call dsyev('v', 'u', l, h, l, w, y, lwork, ierr)
+       if( ierr .ne.0 )then
+           goto 9999
+       end if
+       !! Sort in decreasing order (in-place)
+       !!(we suppose that all the eigen values are positive)
+       do i=1,l/2
+          tmp        = w(i)
+          w(i)       = w(l-i +1)
+          w(l-i+1)   = tmp
+          ! use the first column of y as a workspace
+         y(1:l,1)   = h(:,i)
+          h(:,i)     = h(:,l-i +1)
+          h(:,l-i+1) = y(1:l,1)
+       end do
 
-!!#if defined (mex)
-!!       write(string,'(" IT:",i5," -- Found ",i4," eigenvalues (",f8.5,"% achieved)")')it,n_ev,condition
-!!       k = mexprintf(string//achar(10))
-!!#else
-!!       write(*,'(" IT:",i5," -- Found ",i4," eigenvalues (",f8.5,"% achieved)",a)',advance='no')it,n_ev,condition,char(13)
-!!       write(*,'(" ")')
-!!#endif
-!!       if( condition .gt. percentage) exit
-!!       if( n_ev .ge. l) exit
+       !! v=v*h
+       y = v
+       call dgemm('n', 'n', n, l, l, 1d0, y, n, h, l, 0d0, v, n)
+       conv = 0
+       i    = n_ev +1
+       !! the larger eigenvalue will converge more swiftly than
+       !! those corresponding to the smaller eigenvalue.
+       !! for this reason, we test the convergence in the order
+       !! i=1,2,.. and stop with the first one to fail the test
+       do
+          if( i .gt. l) exit
+          !! compute res=norm(a*v(:,i) - v(:,i)*t(i,i),2)/lambda;
+          !! use the first column of y as a workspace
+          y(:,1) = v(:,i)
+          call dgemv('n', n, n, 1d0, a, n, v(1,i), 1, -w(i), y, 1)
+          res = dnrm2(n, y, ione)/lambda
+          if(res.gt.eps) exit
+          conv         = conv+1
+          d(i)         = w(i)
+          res_ev(i)    = res
+          it_ev(i)     = it
+          i            = i+1
+          condition    = 1.d0-d(n_ev+conv)/d(1)
+       end do
 
-!!    end do
+       n_ev = n_ev + conv
+
+#if defined (mex)
+       write(string,'(" IT:",i5," -- Found ",i4," eigenvalues (",f8.5,"% achieved)")')it,n_ev,condition
+       k = mexprintf(string//achar(10))
+#else
+       write(*,'(" IT:",i5," -- Found ",i4," eigenvalues (",f8.5,"% achieved)",a)',advance='no')it,n_ev,condition,char(13)
+       write(*,'(" ")')
+#endif
+       if( condition .gt. percentage) exit
+       if( n_ev .ge. l) exit
+
+    end do
 
 
-!!    if(it .ge. maxit)then
-!!       ierr=4
-!!       goto 9999
-!!    end if
+    if(it .ge. maxit)then
+       ierr=4
+       goto 9999
+    end if
 
-!!9999 continue
-!!    deallocate(y, h, w)
+9999 continue
+    deallocate(y, h, w)
 
-!!    return
+    return
 
 
   end subroutine subspace_iter_sv
