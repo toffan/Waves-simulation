@@ -29,7 +29,7 @@ program main
   ierr=0
 
   maxit=1000
-  eps=1d-13
+  eps=1d-8
   percentage=10d-3
 
   !! specify the dimensions n, p and the number of the dominante eigen vectors needed
@@ -54,7 +54,6 @@ program main
      write(*,'("m should be >= n. Aborting")')
      stop
   end if
-  
   ! Generate the matrix
   call matgen(imat, a, m, n, s_vals, ierr)
 
@@ -78,7 +77,6 @@ program main
         write(*,'("Can not allocate data, Input matrix is too big for the symmetric version")')
         stop
      endif
-
      !! initialize the subspace v0
      call random_number(u)
      s = 0.d0
