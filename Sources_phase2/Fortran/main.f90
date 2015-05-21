@@ -33,7 +33,7 @@ program main
   percentage=10d-3
 
   !! specify the dimensions n, p and the number of the dominante eigen vectors needed
-  write(*,'("Version (0 :symmetric or 1 :rectangular?")')
+  write(*,'("Version (0 :symmetric or 1 :rectangular)?")')
   read(*,*) version
   write(*,'("p (block-product size)?")')
   read(*,*) p
