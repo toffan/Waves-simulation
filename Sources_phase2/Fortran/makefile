@@ -13,8 +13,7 @@ lib:
 	(cd matgen; make)
 
 mexfile:
-	mex -c mex_subspace_iter_sv.c
-	mex -Dmex -largeArrayDim -c mex_subspace_iter_sv.o m_subspace_iter.F90 $(PLIBS)
+	mex -Dmex -largeArrayDims mex_subspace_iter_sv.c m_subspace_iter.F90 $(PLIBS)
 
 
 main.o: matgen/libaux.a
