@@ -33,13 +33,13 @@ function [Pi,dim] = Classification_computation(Nens, percentInfo, use_svd, Fobs)
         k = k+1;
       end
       k = k-1;
-      dim(GWi) = k;
 
       % Only keep dominant left eigenvectors
       Ui = Ui(:,1:k);
     else
-      % TODO: power iteration method
+      [Ui,k] = Power_iteration(Zi, percentInfo);
     end
+    dim(GWi) = k;
 
     % Computation of the anomaly vector of observations
     Zobsi = Fobs - mFi;

@@ -100,16 +100,77 @@ nous semble donc adaptée pour deux points.
     \caption{Détermination de $\alpha$}
 \end{algorithm}
 
-        \begin{algorithm}
-            \DontPrintSemicolon
-            \For{$i \in \mathbb{N}_3$}{
-                Calculer $U_i$ avec la \og power iteration method \fg\;
-                $Z_{obs,i} = F_{obs} - \bar{F}_i$\;
-                $\pi_i = \|Z_{obs,i} - U_i^T.U_i.Z_{obs,i}\|_2$\;
-            }
-            \caption{Algorithme de classification}
-        \end{algorithm}
+\subsection{Classification d'une solution}
 
+Classifier une observation revient à minimiser la distance qui la sépare de sa
+projection dans un panel de solutions généré avec une classe particulière, c'est
+à dire, trouver $GW$ qui offre un panel de solutions proche de l'observation.
+
+\begin{algorithm}
+    \DontPrintSemicolon
+    \For{$i \in \mathbb{N}_3$}{
+        Calculer $U_i$\;
+        $Z_{obs,i} = F_{obs} - \bar{F}_i$\;
+        $\pi_i = \|Z_{obs,i} - U_i^T.U_i.Z_{obs,i}\|_2$\;
+    }
+    \caption{Algorithme de classification}
+\end{algorithm}
+
+Connaître la classe de l'observation revient alors simplement à prendre $i$ tel
+que $\pi_i$ soit le plus petit des trois.
+
+\newpage
+\section{Influence des paramètres sur les solutions}
+
+\subsection{Sur la classification}
+
+\includegraphics[width=10em, height=10em]{class.png}
+\includegraphics[width=10em, height=10em]{dimension.png}
+\includegraphics[width=10em, height=10em]{distance.png}
+
+Voici trois graphes représentant respectivement l'évolution de $GWi$ la classe de
+l'observation, de la dimension du sous espace, et de la distance entre le
+projeté et le sous espace, ceci en fonction de $percentInfo$ et de $N_{ens}$.
+
+\paragraph{}
+On voit donc que les modification de ces paramètres n'influencent pas sur
+l'obtention de la classe de l'observation.
+
+Le graphique n'étant pas affiché, il faut néanmoins savoir que le temps
+d'exécution croît grandement avec $N_{ens}$, résultat que l'on pouvait deviner.
+Il peut être alors acceptable de travailler avec un $percentInfo$ et un
+$N_{ens}$ bas car le résultat qui nous intéresse dans cette partie ne varie pas.
+(Ce qui ne peut pas être accepté lors de la reconstruction car l'erreur entre le
+modèle et la solution reconstruite grandirait).
+
+\paragraph{}
+On voit aussi qu'une augmentation de $percentInfo$ implique une augmentation de
+la dimension du sous espace sur lequel on projettera la solution, alors que
+$N_{ens}$ ne semble pas avoir d'effet sur ce résultat.
+
+\paragraph{}
+Pour finir, on remarquera que la distance entre l'observation et le sous espace
+diminue lorsque $percentInfo$ et $N_{ens}$ augmentent.
+
+\subsection{Suite des influences}
+
+Pour des raisons de temps, les graphes ne sont générés que sur 5 valeurs de
+$percentInfo$ et de $N_{ens}$, avec uniquement 5 générations aléatoires pour
+chacun d'entre elles.
+Idéalement, nous aurions voulu étendre la plage de test à 15 valeurs de
+$percentInfo$ et de $N_{ens}$, avec pour chacune d'elles, une vingtaine de
+générations aléatoires afin d'obtenir un résultat plus représentatif.
+Seulement, ces test étant très longs, le script permettant de les répartir sur
+les machines de l'n7 n'a été terminé qu'à l'instant (jeudi 7, 23h30), sa
+réalisation étant plus complexe que ce que nous imaginions.
+
+\paragraph{}
+Nous n'avons donc pas eu le temps d'adapter ces test pour la reconstruction.
+
+Il est cependant évident que plus $percentInfo$ et $N_{ens}$ sont élevés, plus
+l'erreur relative sera faible.
+
+\newpage
 \section{Méthode dérivée de la puissance itérée, analyse et implémentation}
 
     \subsection{Avantages et inconvénients de la méthode}
@@ -122,9 +183,10 @@ nous semble donc adaptée pour deux points.
         matériel et réduire les temps de calcul, n'implémentent ni l'algorithme
         de Strassen en $\mathcal{O}(n^{2.807})$ ni aucun des développements
         récents dans le domaine qui vont jusqu'au $\mathcal{O}(n^{2.3728642})$ de
-        Virginia V. Williams et au $\mathcal{0}(n^{2.3728639})$ de LeGall, nous supposerons que la complexité en temps d'une
-        multiplication matricielle de MATLAB est en $\mathcal{O}(n^3)$ pour une
-        matrice de $\mathbb{R}^{n*n}$ et $\mathcal{O}(nmk)$ pour des matrices de
+        Virginia V. Williams et au $\mathcal{0}(n^{2.3728639})$ de LeGall, nous
+        supposerons que la complexité en temps d'une multiplication matricielle
+        de MATLAB est en $\mathcal{O}(n^3)$ pour une matrice de
+        $\mathbb{R}^{n*n}$ et $\mathcal{O}(nmk)$ pour des matrices de
         $\mathbb{R}^{n*m}$ et $\mathbb{R}^{m*k}$.
         \end{remark}
 
