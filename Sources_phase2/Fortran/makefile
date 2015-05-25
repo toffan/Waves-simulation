@@ -13,7 +13,8 @@ lib:
 	(cd matgen; make)
 
 mexfile:
-	mex -Dmex -largeArrayDims mex_subspace_iter_sv.c m_subspace_iter.F90 $(PLIBS)
+	/usr/local/matlab/bin/mex -c mex_subspace_iter_sv.c
+	/usr/local/matlab/bin/mex -Dmex -largeArrayDim -c mex_subspace_iter_sv.o m_subspace_iter.F90 $(PLIBS)
 
 
 main.o: matgen/libaux.a
