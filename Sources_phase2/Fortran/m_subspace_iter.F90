@@ -261,6 +261,7 @@
     ! a natural choice of lambda is an estimate of some norm of a.
     ! use y as a workspace
     lambda=dlange('f', m, n, a, m, y)
+    lambda=lambda**2
 
     call orth_basis(u, n, l, y)
 
@@ -322,7 +323,7 @@
           y(:,1) = u(:,i)
           call dgemv('t', m, n, 1d0, a, m, u(1,i), 1, 0d0, y(1,2), 1)
           call dgemv('n', m, n, 1d0, a, m, y(1,2), 1, -w(i), y, 1)
-          res = dnrm2(m, y, ione)/(lambda**2)
+          res = dnrm2(m, y, ione)/lambda
           print*, res, "!=", eps
           if(res.gt.eps) exit
           conv         = conv+1
@@ -331,7 +332,10 @@
           it_sv(i)     = it
           i            = i+1
           condition    = 1.d0-s(n_sv+conv)/s(1)
-          if(condition.gt.percentage) exit
+          if(condition.gt.percentage) then
+              conv = conv - 1
+              exit
+          end if
        end do
 
        n_sv = n_sv + conv
@@ -343,7 +347,7 @@
        write(*,'(" IT:",i5," -- Found ",i4," eigenvalues (",f8.5,"% achieved)",a)',advance='no')it,n_sv,condition,char(13)
        write(*,'(" ")')
 #endif
-       if( condition .gt. percentage) exit
+       if(condition .gt. percentage) exit
        if( n_sv .ge. l) exit
 
     end do
