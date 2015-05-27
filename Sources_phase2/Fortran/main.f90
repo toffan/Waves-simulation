@@ -29,7 +29,7 @@ program main
   ierr=0
 
   maxit=1000
-  eps=1d-8
+  eps=1d-13
   percentage=10d-3
 
   !! specify the dimensions n, p and the number of the dominante eigen vectors needed

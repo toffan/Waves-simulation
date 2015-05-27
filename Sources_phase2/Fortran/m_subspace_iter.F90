@@ -322,7 +322,7 @@
           y(:,1) = u(:,i)
           call dgemv('t', m, n, 1d0, a, m, u(1,i), 1, 0d0, y(1,2), 1)
           call dgemv('n', m, n, 1d0, a, m, y(1,2), 1, -w(i), y, 1)
-          res = dnrm2(m, y, ione)/lambda
+          res = dnrm2(m, y, ione)/(lambda**2)
           print*, res, "!=", eps
           if(res.gt.eps) exit
           conv         = conv+1
