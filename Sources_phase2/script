@@ -1,0 +1,36 @@
+#!/bin/bash
+
+lst_ordis(){
+  ldapsearch -x -h ldapmaster.enseeiht.fr -b ou=hosts,dc=n7,dc=fr puppetclass=$1 cn | grep n7\.fr | cut -f 2 -d ' ' | cut -f 1 -d '.'
+}
+tt_ordis(){
+  for salle in c201 c202 c203 c204 c205 c206 c303 c304 c305 c306; do
+    lst_ordis $salle
+  done
+}
+valide(){
+  ssh ${1}.e "matlab -r \"quit;\"" 1>/dev/null 2>/dev/null && echo $1 || echo "false"
+}
+liste="$(tt_ordis)"
+i=1
+for Nens in 5 8 11 14 17 20 23 26 29 32 35 38 41 44 47 50 53 55 59 62 65 68 71 74 77; do
+  j=1
+  for percentInfo in 87 875 88 885 89 895 9 905 91 915 92 925 93 935 94 945 95 955 96 965 97 975 98 985 99; do
+    while true; do
+      first="$( echo "$liste" | sed -n 1p )"
+      ordi="$( valide "$first" )"
+      temp="$( echo "$liste" | sed -n "2~1p" )"
+      if [ "$ordi" != "false" ]; then
+        liste="$temp
+$first"
+        echo "ssh ${ordi}.e \"cd Waves-simulation/Sources_phase2 && matlab -r \\\"Reco_param(100, $i, $j, $Nens, 0.$percentInfo);quit;\\\"\" 1>/dev/null &"
+#        ssh ${ordi}.e \"cd Waves-simulation/Sources_phase2 && matlab -r \\\"Reco_param(100, $i, $j, $Nens, 0.$percentInfo);quit;\\\"\" 1>/dev/null &
+        break
+      else
+        liste="$temp"
+      fi
+    done
+    let 'j+=1'
+  done
+  let 'i+=1'
+done
