@@ -41,7 +41,9 @@ function [U,k] = Power_iteration(Z, percentInfo)
       if (norm(Z*temp - Gamma(i,i)*V(:,i))/normeA <= epsilon)
         k = k+1;
         VapTrouvees(1,i) = Gamma(i,i);
-        break;
+        if (sqrt(VapTrouvees(1,i) / VapTrouvees(1,1)) <= 1 - percentInfo)
+          break;
+        end
       else
         break;
       end
