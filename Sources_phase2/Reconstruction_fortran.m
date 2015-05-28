@@ -23,7 +23,8 @@ muF = mean(F,2);
 Z   = F - repmat(muF,1,Nens);
 
 %%%%%%%  Compute the SVD of A    %%%%%%%
-if (check)  
+if (check)
+  tic;
   [U,S,~] = svd(Z,0);
   D = diag(S);
   if (D(1)==0)
@@ -36,15 +37,20 @@ if (check)
   end
   converged=converged-1;
   U = U(:,1:converged);
-  fprintf('dimension of the subspace: %d\n',converged);
+  time = toc;
+  fprintf('dimension of the subspace: %d\n temps: %7.3f seconds',converged,time);
 else
   addpath('Fortran') 
   p=1;
   m=10;
   maxit=300;
   eps=1.e-8;
+  [sup_m,sup_n] = size(F);
   tic;
-  [U,d] = fortran_subspace_iter_sv(Z,m,p,percentInfo,eps,maxit);
+  [U,d] = fortran_subspace_iter_sv(Z(43:46:sup_m,:),m,p,percentInfo,eps,maxit);
+  % [U,d] = fortran_subspace_iter_sv(Z,m,p,percentInfo,eps,maxit);
+  [m,n] = size(U);
+  U = [U;zeros(sup_m-m,n)];
   time=toc;
   converged=size(d,1);
   condition=1-d(end)/d(1);

@@ -275,7 +275,7 @@
     do while( (n_sv.lt.l) .and. (it.lt.maxit) )
 
        it = it+1
-       !!compute  y=a*v
+       !!compute  u=(a*a')^p*u
        do i=1, p
           call dgemm('t', 'n', n, l, m, 1.d0, a, m, u, m, 0.d0, z, n)
           call dgemm('n', 'n', m, l, n, 1.d0, a, m, z, n, 0.d0, y, m)
@@ -283,12 +283,12 @@
        end do
 
        !! orthogonalization using Gramm Schmidt procedure
-      !! compute  v=orth(y)
+      !! compute  u=orth(u)
        call orth_basis(y, m, l, u)
 
-       !!compute  y=a'*v
+       !!compute  z=a'*u
        call dgemm('t','n', n, l, m, 1d0, a, m, u, m, 0d0, z, n)
-       !!compute  h=y'*y
+       !!compute  h=z'*z
        call dgemm('t', 'n', l, l, n, 1d0, z, n, z, n, 0d0, h, l)
        ! Compute eig-decomposition of h. Use y as a workspace
        call dsyev('v', 'u', l, h, l, w, y, lwork, ierr)
@@ -307,7 +307,7 @@
           h(:,l-i+1) = y(1:l,1)
        end do
 
-       !! v=v*h
+       !! u=u*h
        y = u
        call dgemm('n', 'n', m, l, l, 1d0, y, m, h, l, 0d0, u, m)
        conv = 0
@@ -318,7 +318,7 @@
        !! i=1,2,.. and stop with the first one to fail the test
        do
           if( i .gt. l) exit
-          !! compute res=norm(a*v(:,i) - v(:,i)*t(i,i),2)/lambda;
+          !! compute res=norm(a*u(:,i) - u(:,i)*w(i),2)/lambda;
           !! use the first column of y as a workspace
           y(:,1) = u(:,i)
           call dgemv('t', m, n, 1d0, a, m, u(1,i), 1, 0d0, y(1,2), 1)
