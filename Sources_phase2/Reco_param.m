@@ -28,50 +28,24 @@ function [] = Reco_param(n_test, Nens_i, percentInfo_i, Nens, percentInfo)
       converged=converged+1;
     end
     converged=converged-1;
-    U = U(:,1:converged);
-    time = toc;
+    U1 = U(:,1:converged);
+    time1 = toc;
 
-    local_results(i,1) = time;
-    local_local_results1 = zeros(n_test, 1);
-
-    for j=1:n_test
-
-      %%%%%%%       Reconstruction        %%%%%%%
-      [X, ns, nt] = Model(GW,1);
-      X0 = X(1:ns,:);
-      %%%%
-      Zp = zeros(size(X));
-      %%%%
-      Z0=X0-muF(1:ns);
-      alpha=(U(1:ns,:)'*U(1:ns,:))\(U(1:ns,:)'*Z0);
-      Zp=U*alpha;
-
-      %%%% Compute the error %%%%
-      Xp = Zp + muF;
-      error=norm(Xp-X)/norm(X);
-
-      %%% Save results
-      local_local_results(j,:) = [d_time d_error]
-
-    end
+    %%% Fortran algorithm
 
     addpath('Fortran')
     p=1;
     m=10;
     maxit=300;
     eps=1.e-8;
-    [sup_m,sup_n] = size(F);
     tic;
-    [U,d] = fortran_subspace_iter_sv(Z(43:46:sup_m,:),m,p,percentInfo,eps,maxit);
-    % [U,d] = fortran_subspace_iter_sv(Z,m,p,percentInfo,eps,maxit);
-    [m,n] = size(U);
-    U = [U;zeros(sup_m-m,n)];
-    converged=size(d,1);
-    time=toc;
-    condition=1-d(end)/d(1);
+    [U2,d] = fortran_subspace_iter_sv(Z,m,p,percentInfo,eps,maxit);
+    %converged2=size(d,1);
+    time2=toc;
+    %condition=1-d(end)/d(1);
 
-    local_results(i,1) = time;
-    local_local_results2 = zeros(n_test, 1);
+    local_results(i,1) = (time2 - time1)/time1;
+    local_local_results = zeros(n_test, 1);
 
     for j=1:n_test
 
@@ -79,22 +53,28 @@ function [] = Reco_param(n_test, Nens_i, percentInfo_i, Nens, percentInfo)
       [X, ns, nt] = Model(GW,1);
       X0 = X(1:ns,:);
       %%%%
-      Zp = zeros(size(X));
+      %Zp = zeros(size(X));
       %%%%
       Z0=X0-muF(1:ns);
-      alpha=(U(1:ns,:)'*U(1:ns,:))\(U(1:ns,:)'*Z0);
-      Zp=U*alpha;
-
+      
+      %%% svd
+      alpha=(U1(1:ns,:)'*U1(1:ns,:))\(U1(1:ns,:)'*Z0);
+      Zp=U1*alpha;
       %%%% Compute the error %%%%
       Xp = Zp + muF;
-      error=norm(Xp-X)/norm(X);
+      error1=norm(Xp-X)/norm(X);
+      
+      %%% fortran
+      alpha=(U2(1:ns,:)'*U2(1:ns,:))\(U2(1:ns,:)'*Z0);
+      Zp=U2*alpha;
+      %%%% Compute the error %%%%
+      Xp = Zp + muF;
+      error2=norm(Xp-X)/norm(X);
 
       %%% Save results
-      local_local_results(j,:) = [d_time d_error]
+      local_local_results(j,1) = (error2 - error1)/error1;
 
     end
-
-    local_local_results = local_local_results2 - local_local_results1;
 
     local_results(i,2) = mean(local_local_results);
 
@@ -106,8 +86,7 @@ function [] = Reco_param(n_test, Nens_i, percentInfo_i, Nens, percentInfo)
   try
     load('resultats.mat');
   catch fnf
-    % 25 Nens x 25 percentInfo
-    resultats = zeros(25, 25, 2);
+    resultats = zeros(13, 13, 2);
   end
 
   resultats(Nens_i,percentInfo_i,:) = line;
