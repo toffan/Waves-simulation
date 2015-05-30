@@ -93,10 +93,10 @@ function [] = Reco_param2(n_test, Nens_i, percentInfo_i, Nens, percentInfo)
   try
     load('resultats2.mat');
   catch fnf
-    resultats = zeros(13, 13, 2);
+    resultats2 = zeros(13, 13, 2);
   end
 
-  resultats(Nens_i,percentInfo_i,:) = line;
+  resultats2(Nens_i,percentInfo_i,:) = line;
 
   save('resultats2.mat', 'resultats2');
 end
