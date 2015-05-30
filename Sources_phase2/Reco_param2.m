@@ -41,14 +41,14 @@ function [] = Reco_param2(n_test, Nens_i, percentInfo_i, Nens, percentInfo)
     [sup_m,sup_n] = size(F);
     tic;
     [U2,d] = fortran_subspace_iter_sv(Z(43:46:sup_m,:),m,p,percentInfo,eps,maxit);
-    [m,n] = size(U);
+    [m,n] = size(U2);
     super_U = zeros(sup_m-42, n);
     for i=1:m
       if (mod(i,3) < 1)
-        super_U(3*(i-1) + 1,:) = U(i,:);
+        super_U(3*(i-1) + 1,:) = U2(i,:);
       end
     end
-    U = [zeros(42,n) ; super_U];
+    U2 = [zeros(42,n) ; super_U];
     time2=toc;
 
     local_results(i,1) = (time2 - time1)/time1;
