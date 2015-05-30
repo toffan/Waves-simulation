@@ -12,7 +12,7 @@ GW = 1;
 
 % TODO : assess the impact of this parameter on the results
 % of the reconstruction
-percentInfo = 0.95;
+percentInfo = 0.99;
 
 % Generate the simulations
 F = Model(GW,Nens);
@@ -56,7 +56,7 @@ else
       super_U(3*(i-1) + 1,:) = U(i,:);
     end
   end
-  U = [zero(42,n);super_U];
+  U = [zeros(42,n);super_U];
   time=toc;
   converged=size(d,1);
   condition=1-d(end)/d(1);
