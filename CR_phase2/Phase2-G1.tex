@@ -59,7 +59,92 @@
   \tableofcontents
 \end{titlepage}
 
+\section{Introduction}
+
+    Nous arrivons à la fin de ce projet, et il est maintenant temps
+    d'analyser le travail qui a été fait par notre groupe, à la fois
+    pour présenter nos résultats, mais aussi pour pouvoir nous améliorer.
+
+    Dans un premier temps, nous avons eu à implémenter deux méthodes 
+    d'analyse d'un modèle physique fourni (dérivée des Shallow Water Equations) :
+
+    \paragraph{}
+    \begin{itemize}
+        \item La reconstruction, qui consiste à partir de multiples itérations
+        du modèle pour déduire le comportement de celui-çi pour des conditions
+        initiales données.
+        \item La classification, qui elle part aussi de multiples itérations
+        du modèle, mais cette fois-çi pour déduire un paramètre d'entrée de
+        celui-çi.
+    \end{itemize}
+
+\bigskip 
+
+    Notre travail personnel dans la mise en place de ces deux méthodes
+    a été principalement d'implémenter un algorithme efficace de calcul
+    des valeurs singulières et de choisir une méthode itérative pour la
+    reconstruction.
+
+    En ce qui concerne l'algorithme pour la décomposition en valeurs
+    singulières, il sera explicité dans la section suivante.
+
+    Quand à la méthode itérative que nous avons utilisée pour
+    déterminer $\alpha$ dans la reconstruction, il s'agit d'une
+    steepest descent sur l'équation normale $U_{0}^t*U_{0}*\alpha = U_{0}^t*Z_0$.
+    En effet, cette équation contient bien une matrice symétrique
+    définie positive, ce qui nous permet d'utiliser la steepest descent,
+    et d'assurer que celle-çi converge bien.
+
+    \paragraph{}
+    Dans un second temps, nous avons du implémenter la subspace Iteration
+    Method en fortran, pour accélerer celle-çi, puis l'interfacer avec
+    Matlab.
+
+    Enfin, nous avons conduit quelques tests sur ces implémentations,
+    ainsi que d'autres sur une modification liée au modèle physique.
+
+    \paragraph{}
+    Maitenant, nous allons passer au rapport proprement dit.
+
+\newpage
+
 \section{Implémentation de la Subspace Iteration method en Fortran}
+
+    Tout d'abord, nous fournissons l'algorithme final, tel qu'il est
+    implémenté en Fortran, avant de l'expliquer.
+
+    \paragraph{}
+    \begin{algorithm}[H]
+    \DontPrintSemicolon
+    $V = matrice\ orthogonale\ quelconque \in \mathbb{R}^{m*n}$\;
+    $niter = 0$\;
+    $converged = 0$\;
+    $PercentReached = 0$\;
+    $normeA = \norme{Z^T*Z}$\;
+    \Repeat{$PercentReached \leq PercentInfo$ or $niter < MaxIter$}{
+       \For{$i=1, p$}{
+            $V = Z^T*Y$\;
+            $V = Z*Y$\;
+        }
+        $V = \mathrm{Gram-Schmidt}(V)\footnote{Nous ne rappellons pas l'algorithme d'orthogonalisation de Gram-Schmidt, mais celui-çi est implémenté dans le code}$\;
+        $H = Z^T*V$\;
+        $H = H^T*H$\;
+        $[X,\Lambda] = decomposition\ spectrale\ de\ H$\;
+        $[X,\Lambda] = ordonnancement\ decroissant\ de\ [X,\Lambda]$\;
+        $V = V*X$\;
+        \For {$i=converged + 1, n$}{
+            \eIf{$\displaystyle \frac{\norme{Z*Z^T*V(i) - \Lambda(i,i).V(i)}}{normeA} \leq \epsilon$}{
+                $converged = converged + 1$\;
+               $\displaystyle PercentReached = 1 - \frac{\norme{Z - \sum\limits_{j=1}^i \sqrt[4]{\Lambda(i,i)}V(i)V(i)^TZ^T}}{\sqrt{normeA}}$\;
+           } {
+               break\;
+           }
+       }
+       $niter = niter + 1$\;
+   }
+   \caption{Méthode du sous-espace singulier dominant}
+   \end{algorithm}
+
 
 \section{Test de l'implémentation Fortran}
 
@@ -67,5 +152,6 @@
 
 \section{Addendum : prise en compte du modèle physique}
 
+\section{Conclusions}
 
 \end{document}
