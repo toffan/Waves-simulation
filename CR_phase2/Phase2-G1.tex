@@ -20,7 +20,7 @@
 \usepackage[french, lined,ruled]{algorithm2e}
 
 \title{\Huge\textbf{Rapport de Phase 2 du Groupe 1}}
-\author{Lemarchand Benoît \& Megna Anaël \& Shimi Adam}
+\author{Shimi Adam \& Megna Anaël \& Lemarchand Benoît}
 \date{Vendredi, 29 Mai 2015}
 
 \usepackage{fancyhdr}
@@ -41,6 +41,7 @@
 \DeclareMathOperator{\Tr}{Tr}
 
 \newtheorem*{remark}{Remarque}
+\newtheorem*{erratum}{Erratum}
 
 \usepackage{listings}
 
@@ -65,7 +66,7 @@
     d'analyser le travail qui a été fait par notre groupe, à la fois
     pour présenter nos résultats, mais aussi pour pouvoir nous améliorer.
 
-    Dans un premier temps, nous avons eu à implémenter deux méthodes 
+    Dans un premier temps, nous avons eu à implémenter deux méthodes
     d'analyse d'un modèle physique fourni (dérivée des Shallow Water Equations) :
 
     \paragraph{}
@@ -78,7 +79,7 @@
         celui-çi.
     \end{itemize}
 
-\bigskip 
+\bigskip
 
     Notre travail personnel dans la mise en place de ces deux méthodes
     a été principalement d'implémenter un algorithme efficace de calcul
@@ -91,9 +92,18 @@
     Quand à la méthode itérative que nous avons utilisée pour
     déterminer $\alpha$ dans la reconstruction, il s'agit d'une
     steepest descent sur l'équation normale $U_{0}^t*U_{0}*\alpha = U_{0}^t*Z_0$.
-    En effet, cette équation contient bien une matrice symétrique
-    définie positive, ce qui nous permet d'utiliser la steepest descent,
-    et d'assurer que celle-çi converge bien.
+
+    \begin{erratum}Nous avons utilisé la steepest descent dans
+    cette phase 1, alors que le critère d'arret sur la recherche
+    des valeurs propres assure dans l'immense majorité des cas
+    que toutes les valeurs singulières de U sont positives, et
+    donc que $U0^T*U0$ est inversible.
+
+    Nous pouvions donc directement résoudre l'équation normale
+    (comme cela a été fait dans la correction).
+
+    Nous nous excusons encore une fois pour cette erreur stupide.
+    \end{erratum}
 
     \paragraph{}
     Dans un second temps, nous avons du implémenter la subspace Iteration
@@ -110,13 +120,14 @@
 
 \section{Implémentation de la Subspace Iteration method en Fortran}
 
-    Tout d'abord, nous fournissons l'algorithme final, tel qu'il est
-    implémenté en Fortran, avant de l'expliquer.
+    Tout d'abord, nous rappelons le pseudo code fourni dans le compte-rendu
+    de la phase 1, avant d'expliquer l'algorithme en lui-même, ainsi que
+    de préciser l'implémentation en Fortran.
 
     \paragraph{}
     \begin{algorithm}[H]
     \DontPrintSemicolon
-    $V = matrice\ orthogonale\ quelconque \in \mathbb{R}^{m*n}$\;
+    $V = matrice\ orthogonale\ quelconque \in \mathbb{R}^{m*l}$\;
     $niter = 0$\;
     $converged = 0$\;
     $PercentReached = 0$\;
@@ -135,15 +146,82 @@
         \For {$i=converged + 1, n$}{
             \eIf{$\displaystyle \frac{\norme{Z*Z^T*V(i) - \Lambda(i,i).V(i)}}{normeA} \leq \epsilon$}{
                 $converged = converged + 1$\;
-               $\displaystyle PercentReached = 1 - \frac{\norme{Z - \sum\limits_{j=1}^i \sqrt[4]{\Lambda(i,i)}V(i)V(i)^TZ^T}}{\sqrt{normeA}}$\;
-           } {
-               break\;
-           }
-       }
-       $niter = niter + 1$\;
-   }
-   \caption{Méthode du sous-espace singulier dominant}
-   \end{algorithm}
+                $\displaystyle PercentReached = 1 - \frac{\norme{Z - \sum\limits_{j=1}^i \sqrt[4]{\Lambda(i,i)}V(i)V(i)^TZ^T}}{\sqrt{normeA}}$\;
+            } {
+                break\;
+            }
+        }
+        $niter = niter + 1$\;
+    }
+    \caption{Méthode du sous-espace singulier dominant}
+    \end{algorithm}
+
+\newpage
+
+    \paragraph{}
+    Il est temps d'expliquer plus précisément cet algorithme. Comme
+    expliqué dans le sujet de la phase 1, il est adapté de la power
+    method, qui permet de calculer une à une les valeurs propres dans
+    l'ordre décroissant d'une matrice carrée.
+
+    \paragraph{}
+    Comme dans l'algorithme de la power method, le but est ici de
+    polariser des vecteurs selon les vecteurs propres en les multipliant
+    par la matrice, afin de les faire tendre vers les dit vecteurs propres
+    après suffisament d'itérations. Les principales différences ici étant
+    que nous travaillons sur toutes les valeurs propres en parallèle (la
+    raison pour laquelle notre algorithme peut renvoyer la proportion demandée
+    de valeurs propres en une itération, alors que la power method prendrait
+    dans le meilleur des cas la somme des multiplicités de ces valeurs propres.)
+
+    Une autre différence facilement traitable est le fait que nous cherchons ici
+    les valeurs singulières et les vecteurs singuliers gauche d'une matrice
+    rectangle. Il suffit de remarquer que ce sont les valeurs propres et les
+    vecteurs propres de la matrice consistant en le produit de notre
+    matrice rectangulaire avec sa transposée pour se ramener au cas carré.
+
+    \paragraph{}
+    Comme dit plus haut, la subspace method consiste à polariser non pas
+    un vecteur selon la valeur propre dominante, mais une base de n vecteurs
+    orthogonaux selon les n valeurs propres dominantes. Pour cela, la méthode
+    est la même que dans la power method, c'est à dire une multiplication par
+    la matrice carré dont on cherche les valeurs propres. A noter qu'il est
+    possible de multiplier plusieurs fois la base par cette matrice à chaque
+    itération, pour s'assurer que tous les vecteurs ne sont pas polarisé par
+    la valeur propre dominante.
+
+    On n'oublie pas d'orthogonaliser après coup les vecteurs par gram-schmidt,
+    afin de laisser à chaque vecteur "approximé" une polarisation selon un unique vecteur
+    propre.
+
+    \paragraph{}
+    Ensuite, extraire les approximations de vecteurs propres que sont devenus
+    les vecteurs de la base orthonormale s'avère un peu plus dur que dans la
+    power method, étant donné qu'ils sont "enfouis" dans ces vecteurs.
+
+    L'idée est d'exprimer les vecteurs de cette base orthonormale dans la
+    base de vecteurs propres de la matrice carrée. Pour expliquer cela, nous
+    allons recourir aux notations de l'énoncé, c'est-à-dire que la matrice
+    carrée dont nous cherchons les valeurs et vecteurs propres est notée $A$
+    et que la matrice contenant la base des vecteurs orthogonaux polarisés
+    par A puis orthogonalisés de nouveau est notée $V$. Ainsi, nous calculons
+    la matrice $V^T*A*V$, aussi connue sous le nom de quotient de Rayleigh de
+    la base V par la matrice A.
+
+    Puis, nous calculons les valeurs propres et les vecteurs propres du quotient
+    de Rayleigh. En faisant le simple calcul $V*V^T*A*V*V^T = A$, on voit qu'il
+    suffit de réexprimer les vecteurs propres du quotient de rayleigh dans la base
+    de $V$ (par une multiplication matricielle donc) pour obtenir une approximation
+    des vecteurs propres de $A$
+
+    \paragraph{}
+    Enfin, pour décider si un couple valeur et vecteur propre est suffisament proche
+    pour être accepté, nous calculons l'erreur du vecteur propre par la multiplication
+    par A, rescalée par la norme de A pour être indépendante de la valeur de la
+    valeur propre considérée. Plus formellement, si $\lambda_i$ $v(:,i)$ sont
+    respectivement la valeur propre et le vecteur propre approximé, nous calculons
+    $\frac{\norme{A*v(:,i) - \lambda_i*v(:,i)}}{\norme{A}}$ et nous le comparons
+    à l'erreur acceptée.
 
 
 \section{Test de l'implémentation Fortran}
