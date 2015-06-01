@@ -26,12 +26,15 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Implémentation}
+\section{Travail algorithmique}
 \begin{frame}
   \frametitle{}
-  \begin{center}
-    \includegraphics[width=5cm]{fig/fluttershy.jpg}
-  \end{center}
+  \begin{itemize}
+    \item Implémenter la subspace iteration method.
+    \item Utiliser le sous-espace significatif pour la reconstruction.
+    \item Trouver le sous-espace significatif le plus proche d'une observation
+          pour la classification.
+  \end{itemize}
 \end{frame}
 
 
@@ -39,9 +42,12 @@
 \section{Test du code Fortran}
 \begin{frame}
   \frametitle{}
+  \begin{figure}
   \begin{center}
-    \includegraphics[width=5cm]{fig/fluttershy.jpg}
+    \caption{temps relatif en fonction de n et p}
+    \includegraphics[width=5cm]{imat4.png}
   \end{center}
+  \end{figure}
 \end{frame}
 
 
@@ -49,9 +55,12 @@
 \section{Test du code Matlab}
 \begin{frame}
   \frametitle{}
+  \begin{figure}
   \begin{center}
-    \includegraphics[width=5cm]{fig/fluttershy.jpg}
+    \caption{temps relatif en fonction de Nens et percentInfo}
+    \includegraphics[width=5cm]{time1.png}
   \end{center}
+  \end{figure}
 \end{frame}
 
 
@@ -59,9 +68,21 @@
 \section{Prise en compte du modèle physique}
 \begin{frame}
   \frametitle{}
+  \begin{figure}
   \begin{center}
-    \includegraphics[width=5cm]{fig/fluttershy.jpg}
+    \caption{temps relatif en fonction de Nens et percentInfo}
+    \includegraphics[width=5cm]{time2_1.png}
   \end{center}
+  \end{figure}
+\end{frame}
+\begin{frame}
+  \frametitle{}
+  \begin{figure}
+  \begin{center}
+    \caption{erreur relative en fonction de Nens et percentInfo}
+    \includegraphics[width=5cm]{error2_1.png}
+  \end{center}
+  \end{figure}
 \end{frame}
 
 \end{document}
