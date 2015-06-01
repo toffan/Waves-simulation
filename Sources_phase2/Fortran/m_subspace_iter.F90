@@ -241,7 +241,6 @@
     integer*4 :: k
 #endif
 
-   
     ierr = 0
     !! initialization process ...
     if((percentage.gt.1d0)  .or. (percentage.lt.0d0)) then
@@ -255,9 +254,9 @@
 
     allocate(y(m,l), z(n,l), h(l,l), w(l), stat=ierr)
     if(ierr .ne. 0) return
- 
+
     lwork = n*l
-    
+
     ! a natural choice of lambda is an estimate of some norm of a.
     ! use y as a workspace
     lambda=dlange('f', m, n, a, m, y)
@@ -270,7 +269,7 @@
     s         = 0d0
     it        = 0
     n_sv      = 0
-    
+
     it=0
     do while( (n_sv.lt.l) .and. (it.lt.maxit) )
 
@@ -283,7 +282,7 @@
        end do
 
        !! orthogonalization using Gramm Schmidt procedure
-      !! compute  u=orth(u)
+       !! compute  u=orth(u)
        call orth_basis(y, m, l, u)
 
        !!compute  z=a'*u
