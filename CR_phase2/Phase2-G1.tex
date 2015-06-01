@@ -223,13 +223,240 @@
     $\frac{\norme{A*v(:,i) - \lambda_i*v(:,i)}}{\norme{A}}$ et nous le comparons
     à l'erreur acceptée.
 
+    \bigskip
+    \paragraph{}
+    En ce qui concerne l'implémentation en fortran à proprement parler, il a surtout
+    fallut déconstruire les calculs matricels et vectoriels complexes en séquences
+    de primitives.
 
+    Aussi, nous avons rendu explicite les astuces utilisées dans la partie 1 pour
+    éviter de calculer la matrice $A$, étant donné que dans le cas qui nous intéresse
+    , celle-çi cause un Memory overflow.
+
+\newpage
 \section{Test de l'implémentation Fortran}
 
+    \paragraph{}
+    Dans cette partie, il s'agit d'analyser les résultats des comparaisons
+    entre le temps mis par notre implémentation fortran, la même implémentation
+    en version matrice symétrique (c'est-à-dire avec le calcul explicite de la
+    matrice $A = Z*Z^T$) et la méthode dédiée de LAPACK, fortement optimisée
+    par des années de recherche.
+
+    \paragraph{}
+    Tout d'abord, nous avons remarqué que la comparaison qui faisait le plus sens
+    était celle de notre implémentation et de LAPACK. En effet, la version symétrique,
+    en plus d'être la version de notre algorithme inapplicable à notre problème de départ
+    , ne dévie de notre implémentation que par un facteur constant, le quotient du temps
+    mis pour faire deux multiplications matricielle par le temps mis pour faire une seule
+    multiplication matricielle, mais par le produit des deux matrices précédentes.
+
+    \paragraph{}
+    Ensuite, il y a la question de quels paramètres faire varier. p est un choix
+    inévitable, étant donné que nous ne le faisons pas varier dans les tests du matlab.
+    Pour avoir une nappe en trois dimensions, il manque une variable, que nous
+    posons comme n.
+
+    En effet, fixer m fait sens, étant donné que c'est ce qu'il se passera dans le
+    problème où la méthode sera utilisée. La taille du sous-espace invariant de même.
+
+    Enfin, on refait les tests pour les 4 valeurs d'imat, afin de généraliser les
+    resultats.
+
+    \bigskip
+    \begin{center}
+    \includegraphics[width=20em, height=20em]{imat1.png}
+    \end{center}
+
+    \bigskip
+    \begin{center}
+    \includegraphics[width=20em, height=20em]{imat2.png}
+    \end{center}
+
+    \begin{center}
+    \includegraphics[width=20em, height=20em]{imat3.png}
+    \end{center}
+
+    \begin{center}
+    \includegraphics[width=20em, height=20em]{imat4.png}
+    \end{center}
+
+    \paragraph{}
+    Nous remarquons que les resultats avec les générateurs de matrice 2,3 et 4
+    sont assez similaires, alors que les resultats obtenus à l'aide du générateur
+    de matrice 1 sont plus lisses. Nous choisissons de nous attarder sur les résultats
+    pour imat = 4, la nappe la plus lisse des trois nappes les plus générales.
+
+    \paragraph{}
+    En ce qui concerne l'interpretation des resultats, nous allons le faire en deux temps.
+
+    \bigskip
+
+    \paragraph{}
+    Premièrement, les variations en fonction de n expriment comment les générateurs
+    de matrice répartissent les valeurs singulières. En effet, la principale raison pour
+    laquelle notre routine est plus lente que celle de LAPACK est dans un cas où
+    il faut calculer beaucoup de valeurs singulières, et donc où l'aspect itératif
+    montre ses limites.
+
+    \paragraph{}
+    Dans un second temps, les variations en fonction de p indiquent une notion
+    assez intéressante, qui est celle de l'équilibre dans la répartition des
+    valeurs singulières.
+
+    En effet, plus p est grand, plus il augmente le temps
+    que prend une itération de la routine, étant donné qu'il augmente le nombre
+    de produits matriciels.
+
+    Mais, pour certaines valeurs de p, plus de valeurs singulières peuvent
+    converger en même temps, ce qui baisse le nombre d'itérations de la routine.
+
+    Comme nous le verrons dans la suite du rapport, adapter p à la matrice est
+    le genre d'amélioration dont notre routine a besoin.
+
+\newpage
 \section{Test de l'implémentation Matlab}
 
+    \paragraph{}
+    Les tests que nous avons mis en place pour comparer l'efficacité en temps et
+    en précision de notre implémentation fortran face à la $svd$ consiste, à l'image
+    de ceux de la section précédente, au calcul, pour la même matrice, de l'erreur
+    relative et du temps relatif par rapport à la $svd$
+
+    En ce qui concerne les paramètres variant, nous avons considéré qu'il était
+    acceptable de prendre p fixe, étant donne que l'utilité d'un p différent de 1
+    dans certains cas a été étudié dans les expériences précédentes.
+
+    De plus, cela nous permet de construire des nappes de resultats en trois dimensions,
+    selon Nens et percentInfo.
+
+    \bigskip
+    \begin{center}
+    \includegraphics[width=20em, height=20em]{time1.png}
+    \end{center}
+
+    \paragraph{}
+    Une première observation sur ce graphique est que dans la grande majorité
+    des cas traité, la nappe reste relativement proche du plan $z=0$. Cela
+    nous indique que si notre implémentation ne bat presque jamais la $svd$
+    de matlab, il lui arrive de l'égaler.
+
+    Bien sur, ce qui nous intéresse vraiment concerne les valeurs des paramètres
+    pour lequels notre fonction va clairement moins vite que $svd$.
+
+    Nous pouvons remarquer en premier lieu que plus Nens est faible, à percentInfo
+    fixé, plus la $svd$ gagne du terrain. Cela s'explique par le fait que réduire
+    Nens revient à réduire le nombre de valeurs singulières, donc à avoir soit des
+    valeurs singulières plus proches, auquel cas notre méthode aura du mal à
+    converger pour toutes les valeurs singulières nous intéressant, soit à devoir
+    prendre une grosse majorité des valeurs singulières (surtout que nous testons
+    avec des percentInfo élevés), auquel cas notre algorithme aux multiples itérations
+    se fait évidemment battre par un algorithme qui calcule toutes les valeurs
+    singulières d'un coup.
+
+    \bigskip
+    \begin{center}
+    \includegraphics[width=20em, height=20em]{time2.png}
+    \end{center}
+
+    \paragraph{}
+    Cet angle nous montre maintenant que la précision à partir de laquelle la $svd$
+    surpasse largement notre algorithme est 0.96. Cela fait sens qu'un trop grand
+    percentInfo nous pose des soucis, étant donné que l'on retombe dans ce cas
+    dans le problème de la majorité des valeurs singulières : quel intéret de les
+    calculer séparément si nous les voulons toutes?
+
+    \bigskip
+    \begin{center}
+    \includegraphics[width=20em, height=20em]{error.png}
+    \end{center}
+
+    \paragraph{}
+    Enfin, l'erreur relative est très proche de zero, même aux extrêmes du graphe.
+    Ainsi, notre implémentation, à défaut d'être toujours rapide, est presque toujours
+    précise.
+
+    Nous remarquons tout de même que l'erreur relative augmente légèrement pour de
+    grands Nens et percentInfo.
+
+\newpage
 \section{Addendum : prise en compte du modèle physique}
 
+    \paragraph{}
+    Une fois l'implémentation en fortran et les comparaisons avec $svd$ faites,
+    nous avons voulu voir si nous pouvions aller plus vite que matlab. Evidemment,
+    pour une matrice quelconque, ce désir est assez illusoire.
+
+    Mais nous avons un avantage par rapport à matlab en ce qui concerne les
+    matrices sur lesquelles nous travaillons : nous savons qu'elles découlent
+    d'un modèle physique, et donc nous avons une information de premier choix
+    sur la manière dont les coefficients de cette matrice sont correlés.
+
+    L'idée derrière notre amélioration est d'échantillonner à nouveau toutes les
+    colonnes de Z, en considérant, comme indiquée par les équations différentielles
+    du modèle, que z(.,.,t) est dérivable au voisinage de tout point x,y de la grille.
+    Ainsi, chaque point de la grille observé à l'instant t contient dans son z des
+    informations sur ses voisins.
+
+    D'où l'hypothèse que prendre un coefficient de chaque colonne de Z sur trois suffit
+    à nous donner les informations nécessaires, tout en réduisant la taille de la
+    matrice à traiter.
+
+    Nous échantillonnons Z de cette manière avant de la fournir à notre méthode
+    fortran, puis nous reconstruisons une U de la bonne taille en remplissant une
+    matrice du format de Z, remplie de zeros, par les lignes de U, toutes les trois
+    lignes.
+
+    Voici les resultats :
+
+    \bigskip
+    \begin{center}
+    \includegraphics[width=20em, height=20em]{time2_1.png}
+    \end{center}
+
+    \paragraph{}
+    Tout de suite, nous remarquons que cette nappe a la même forme que celle de
+    notre méthode non modifiée, si ce n'est l'homotéthie qui rend cette nappe-ci
+    majoritairement négative.
+
+    Cela signifie donc que dans la vaste majorité des cas, cette méthode est plus
+    rapide, voir significativement plus rapide que la $svd$.
+
+    Cependant, tout ça n'a d'intérêt que si l'erreur reste acceptable.
+
+    \bigskip
+    \begin{center}
+    \includegraphics[width=20em, height=20em]{error2_1.png}
+    \end{center}
+
+    Clairement, l'erreur relative est plus importante que pour notre méthode
+    classique, mais si l'on regarde l'axe vertical, on remarque qu'elle reste
+    très faible, bien que positive.
+
+    Un autre point intéressant est l'aspect de cette nappe d'erreur, avec une
+    sorte d'oscillation selon l'axe des Nens. Pour l'instant, nous n'avons pas
+    pu expliquer cet aspect.
+
+    Au final, l'idée d'échantillonner en tenant compte du modèle physique permet
+    de gagner un temps significatif, tout en ayant une erreur relative très
+    faible. Peut-être une piste à creuser.
+
+\newpage
 \section{Conclusions}
+
+    \paragraph{}
+    Après avoir travaillé dessus durant tout un projet, la méthode du subspace
+    itération nous semble à la fois puissante et adaptée à la situation, avec
+    un bémol toutefois : la fixité de p.
+
+    Il manque vraiment à cette méthode un moyen de trouver le p "optimal"
+    pour une matrice donnée, ce qui permettrait de "poncer" en grande partie
+    les pics du temps relatif par rapport à la $svd$.
+
+    \paragraph[]
+    En ce qui concerne le projet en général, il a eu le mérite de nous montrer
+    une véritable application des techniques d'ALN, et de nous introduire à ce
+    point de vue vectoriel et matriciel sur le monde physique, rempli de sous
+    espaces significatifs et de polarisations selon une base.
 
 \end{document}
